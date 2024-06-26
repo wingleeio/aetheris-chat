@@ -1,8 +1,9 @@
 import { database } from "@/lib/database";
 import { logger } from "@/lib/logger";
+import { ApiError } from "@/server/error";
 import { lucia } from "@/services/lucia";
 import { resend } from "@/services/resend";
-import { AetherisError, createAetheris } from "@aetheris/server";
+import { createAetheris } from "@aetheris/server";
 
 export const createContext = () => ({
     logger,
@@ -25,6 +26,7 @@ export const action = aether
         if (!sessionId) {
             return {
                 user: null,
+                sessionId: null,
             };
         }
 
@@ -39,20 +41,19 @@ export const action = aether
             cookies.delete(service.lucia.sessionCookieName);
             return {
                 user: null,
+                sessionId: null,
             };
         }
 
         return {
             user,
+            sessionId,
         };
     });
 
-export const userRequiredAction = action.use(({ user }) => {
-    if (!user) {
-        throw new AetherisError({
-            status: 401,
-            message: "You must be signed in to perform this action",
-        });
+export const userRequiredAction = action.use(({ user, sessionId }) => {
+    if (!user || !sessionId) {
+        throw new ApiError(401, "You must be signed in to perform this action");
     }
-    return user;
+    return { user, sessionId };
 });

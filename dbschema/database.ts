@@ -2,6 +2,8 @@ import { Client, Executor } from "edgedb";
 import type { Adapter, DatabaseSession, DatabaseUser } from "lucia";
 import * as queries from "./queries";
 
+export type * from "./queries";
+
 type Queries = typeof queries;
 
 type Database<T> = {
