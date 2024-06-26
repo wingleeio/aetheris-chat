@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { env } from "@/env.server";
 import { logger } from "@/lib/logger";
 import { app } from "@/server";
