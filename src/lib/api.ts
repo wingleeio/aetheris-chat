@@ -3,6 +3,24 @@ import type { App } from "@/server";
 import { createClient, httpLink, loggerLink, matchLink, wsLink } from "@aetheris/client";
 import { createServerHelpers } from "@aetheris/react-query/server";
 
+const getHttpLink = () => {
+    return httpLink({
+        baseUrl: env.NEXT_PUBLIC_URL,
+        headers: async () => {
+            if (typeof window === "undefined") {
+                return import("next/headers").then(({ headers }) => headers());
+            }
+        },
+    });
+};
+
+const getWsLink = () => {
+    return wsLink({
+        baseUrl: env.NEXT_PUBLIC_WS_URL,
+        lazy: true,
+    });
+};
+
 export const api = createClient<App>({
     links: [
         loggerLink({
@@ -16,18 +34,8 @@ export const api = createClient<App>({
                 return "http";
             },
             links: {
-                ws: wsLink({
-                    baseUrl: env.NEXT_PUBLIC_WS_URL,
-                    lazy: true,
-                }),
-                http: httpLink({
-                    baseUrl: env.NEXT_PUBLIC_URL,
-                    headers: async () => {
-                        if (typeof window === "undefined") {
-                            return import("next/headers").then(({ headers }) => headers());
-                        }
-                    },
-                }),
+                ws: typeof window === "undefined" ? getHttpLink() : getWsLink,
+                http: getHttpLink(),
             },
         }),
     ],

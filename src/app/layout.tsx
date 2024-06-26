@@ -1,9 +1,16 @@
-import { ClientProvider } from "@/components/client-provider";
+import { ClientProvider } from "@/components/providers/client-provider";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
+import { Inter as FontSans } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/components/providers";
+
+const fontSans = FontSans({
+    subsets: ["latin"],
+    variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -16,10 +23,13 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <ClientProvider>
-            <html lang="en">
-                <body className={inter.className}>{children}</body>
+        <Providers>
+            <html lang="en" className="absolute inset-0">
+                <body className={cn(fontSans.className, "min-h-full flex flex-col")}>
+                    {children}
+                    <Toaster position="bottom-center" />
+                </body>
             </html>
-        </ClientProvider>
+        </Providers>
     );
 }

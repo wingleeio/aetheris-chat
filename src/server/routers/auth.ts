@@ -50,11 +50,15 @@ export const auth = {
             });
 
             const user = await database.transaction(async (tx) => {
-                const user = await tx.createUser({
-                    email: input.email,
-                    hashed_password: hashedPassword,
-                    email_verified: false,
-                });
+                const user = await tx
+                    .createUser({
+                        email: input.email,
+                        hashed_password: hashedPassword,
+                        email_verified: false,
+                    })
+                    .catch(() => {
+                        throw new ApiError(422, "Email is already in use.");
+                    });
 
                 const emailVerification = await tx.createEmailVerification({
                     code: generateRandomString(8, alphabet("0-9")),
@@ -94,16 +98,16 @@ export const auth = {
     }),
     verifyEmail: userRequiredAction.handler({
         input: z.object({
-            token: z.string(),
+            code: z.string(),
         }),
         resolve: async ({ user, database, input }) => {
             if (user?.email_verified) {
                 throw new ApiError(422, "Email is already verified.");
             }
 
-            database.transaction(async (tx) => {
+            await database.transaction(async (tx) => {
                 const verified = await tx.verifyEmail({
-                    code: input.token,
+                    code: input.code,
                     user_id: user.id,
                 });
 
@@ -118,10 +122,7 @@ export const auth = {
         },
     }),
     resendVerificationEmail: userRequiredAction.handler({
-        input: z.object({
-            email: z.string().email(),
-        }),
-        resolve: async ({ input, user, database, service }) => {
+        resolve: async ({ user, database, service }) => {
             if (user?.email_verified) {
                 throw new ApiError(422, "Email is already verified.");
             }
@@ -137,7 +138,7 @@ export const auth = {
 
                 const { error } = await service.resend.emails.send({
                     from: "Aetheris Chat <no-reply@resend.uwulabs.io>",
-                    to: [input.email],
+                    to: [user.email],
                     subject: "Verify your email address",
                     react: EmailVerification({ code: emailVerification.code }),
                 });
