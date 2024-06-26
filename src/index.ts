@@ -20,6 +20,7 @@ const aetherHandler = createHTTPHandler({
     prefix: "/aether",
 });
 
+logger.info(`Aetheris Chat`);
 logger.info(`Starting server in ${env.NODE_ENV} mode`);
 
 nextApp.prepare().then(() => {

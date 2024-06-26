@@ -4,14 +4,16 @@
     "private": true,
     "scripts": {
         "dev": "tsx watch ./src/index.ts",
-        "build": "next build",
-        "start": "next start",
+        "build:server": "yarn tsc --project tsconfig.server.json && tsc-alias --project tsconfig.server.json",
+        "build:next": "next build",
+        "build": "yarn build:server && yarn build:next",
+        "start": "NODE_ENV=production node ./dist/index.js",
         "lint": "next lint"
     },
     "dependencies": {
-        "@aetheris/client": "^0.0.9",
-        "@aetheris/react-query": "^0.0.9",
-        "@aetheris/server": "^0.0.9",
+        "@aetheris/client": "^0.0.10",
+        "@aetheris/react-query": "^0.0.10",
+        "@aetheris/server": "^0.0.10",
         "@tanstack/react-query": "^5.48.0",
         "next": "14.2.4",
         "pino": "^9.2.0",
@@ -28,6 +30,8 @@
         "@types/ws": "^8.5.10",
         "postcss": "^8",
         "tailwindcss": "^3.4.1",
+        "tsc-alias": "^1.8.10",
+        "tsconfig-paths": "^4.2.0",
         "tsx": "^4.15.7",
         "typescript": "^5"
     }
