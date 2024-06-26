@@ -18,6 +18,7 @@ export const api = createClient<App>({
             links: {
                 ws: wsLink({
                     baseUrl: env.NEXT_PUBLIC_WS_URL,
+                    lazy: true,
                 }),
                 http: httpLink({
                     baseUrl: env.NEXT_PUBLIC_URL,

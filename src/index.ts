@@ -1,10 +1,12 @@
 import { env } from "@/env.server";
 import { logger } from "@/lib/logger";
+import { app } from "@/server";
+import { createContext } from "@/server/aether";
 import { createHTTPHandler } from "@aetheris/server/adapters/http";
+import { applyWSSHandler } from "@aetheris/server/adapters/ws";
 import { createServer } from "http";
 import next from "next";
-import app from "next/app";
-import { createContext } from "react";
+import WebSocket from "ws";
 
 const nextApp = next({
     dev: env.NODE_ENV !== "production",
@@ -27,6 +29,23 @@ nextApp.prepare().then(() => {
         }
         return nextHandler(req, res);
     });
+
+    const wss = new WebSocket.Server({ noServer: true });
+
+    applyWSSHandler({
+        app,
+        wss,
+        createContext,
+    });
+
+    server.on("upgrade", (req, socket, head) => {
+        if (req.url?.startsWith("/aether")) {
+            wss.handleUpgrade(req, socket, head, (ws) => {
+                wss.emit("connection", ws, req);
+            });
+        }
+    });
+
     server.listen(env.PORT, () => {
         logger.info(`Server listening on http://${env.HOSTNAME}:${env.PORT}`);
     });
