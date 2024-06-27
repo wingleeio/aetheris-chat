@@ -9,7 +9,12 @@ select session {
     id,
     email,
     email_verified,
-    avatar_url,
-    cover_url,
+    profile: {
+      id,
+      avatar_url,
+      cover_url,
+      display_name,
+      tag,
+    }
   }
 }

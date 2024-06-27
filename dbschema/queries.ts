@@ -40,21 +40,6 @@ delete Session filter .session_id = <str>$session_id;`, args);
 }
 
 
-export type DeleteUserSessionsArgs = {
-  readonly "user_id": string;
-};
-
-export type DeleteUserSessionsReturns = Array<{
-  "id": string;
-}>;
-
-export function deleteUserSessions(client: Executor, args: DeleteUserSessionsArgs): Promise<DeleteUserSessionsReturns> {
-  return client.query(`\
-delete Session filter .user = <User><uuid>$user_id;`, args);
-
-}
-
-
 export type GetOauthAccountArgs = {
   readonly "provider_user_id": string;
 };
@@ -73,6 +58,21 @@ filter .provider_user_id = <str>$provider_user_id;`, args);
 }
 
 
+export type DeleteUserSessionsArgs = {
+  readonly "user_id": string;
+};
+
+export type DeleteUserSessionsReturns = Array<{
+  "id": string;
+}>;
+
+export function deleteUserSessions(client: Executor, args: DeleteUserSessionsArgs): Promise<DeleteUserSessionsReturns> {
+  return client.query(`\
+delete Session filter .user = <User><uuid>$user_id;`, args);
+
+}
+
+
 export type GetSessionAndUserArgs = {
   readonly "session_id": string;
 };
@@ -85,6 +85,13 @@ export type GetSessionAndUserReturns = {
     "id": string;
     "email": string;
     "email_verified": boolean;
+    "profile": {
+      "id": string;
+      "avatar_url": string | null;
+      "cover_url": string | null;
+      "display_name": string;
+      "tag": string;
+    } | null;
   };
 } | null;
 
@@ -101,6 +108,13 @@ select session {
     id,
     email,
     email_verified,
+    profile: {
+      id,
+      avatar_url,
+      cover_url,
+      display_name,
+      tag,
+    }
   }
 }`, args);
 
@@ -134,6 +148,26 @@ select Session {
 }
 
 
+export type GetUserWithHashedPasswordArgs = {
+  readonly "email": string;
+};
+
+export type GetUserWithHashedPasswordReturns = {
+  "id": string;
+  "hashed_password": string | null;
+} | null;
+
+export function getUserWithHashedPassword(client: Executor, args: GetUserWithHashedPasswordArgs): Promise<GetUserWithHashedPasswordReturns> {
+  return client.querySingle(`\
+select User {
+  id,
+  hashed_password
+}
+filter .email = <str>$email`, args);
+
+}
+
+
 export type SetSessionArgs = {
   readonly "session_id": string;
   readonly "expires_at": Date;
@@ -151,26 +185,6 @@ insert Session {
   expires_at := <datetime>$expires_at,
   user := <User><uuid>$user_id,
 }`, args);
-
-}
-
-
-export type GetUserWithHashedPasswordArgs = {
-  readonly "email": string;
-};
-
-export type GetUserWithHashedPasswordReturns = {
-  "id": string;
-  "hashed_password": string | null;
-} | null;
-
-export function getUserWithHashedPassword(client: Executor, args: GetUserWithHashedPasswordArgs): Promise<GetUserWithHashedPasswordReturns> {
-  return client.querySingle(`\
-select User {
-  id,
-  hashed_password
-}
-filter .email = <str>$email`, args);
 
 }
 
@@ -248,6 +262,27 @@ delete Session filter .expires_at < datetime_current();`);
 }
 
 
+export type CreateOauthAccountArgs = {
+  readonly "provider": string;
+  readonly "provider_user_id": string;
+  readonly "user_id": string;
+};
+
+export type CreateOauthAccountReturns = {
+  "id": string;
+};
+
+export function createOauthAccount(client: Executor, args: CreateOauthAccountArgs): Promise<CreateOauthAccountReturns> {
+  return client.queryRequiredSingle(`\
+insert OAuth2Account {
+  provider := <str>$provider,
+  provider_user_id := <str>$provider_user_id,
+  user := <User><uuid>$user_id,
+}`, args);
+
+}
+
+
 export type DeleteEmailVerificationCodesArgs = {
   readonly "user_id": string;
 };
@@ -279,27 +314,6 @@ insert User {
   email := <str>$email,
   hashed_password := <optional str>$hashed_password,
   email_verified := <bool>$email_verified,
-}`, args);
-
-}
-
-
-export type CreateOauthAccountArgs = {
-  readonly "provider": string;
-  readonly "provider_user_id": string;
-  readonly "user_id": string;
-};
-
-export type CreateOauthAccountReturns = {
-  "id": string;
-};
-
-export function createOauthAccount(client: Executor, args: CreateOauthAccountArgs): Promise<CreateOauthAccountReturns> {
-  return client.queryRequiredSingle(`\
-insert OAuth2Account {
-  provider := <str>$provider,
-  provider_user_id := <str>$provider_user_id,
-  user := <User><uuid>$user_id,
 }`, args);
 
 }

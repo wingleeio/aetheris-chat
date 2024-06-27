@@ -17,8 +17,21 @@ module default {
         };
         hashed_password: str;
         required email_verified: bool;
+        single profile := .<user[is Profile];
+    }
+
+    type Profile extending Base {
         avatar_url: str;
         cover_url: str;
+        bio: str;
+        required display_name: str;
+        required tag: str {
+            constraint expression on (__subject__ LIKE '#%' AND __subject__[1:] NOT LIKE '%[^a-zA-Z0-9]%' AND __subject__[1:] NOT LIKE '#%');
+        }
+        constraint exclusive on ((.display_name, .tag));
+        required user: User {
+            constraint exclusive;
+        };
     }
 
     type OAuth2Account extending Base {
