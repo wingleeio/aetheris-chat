@@ -9,5 +9,7 @@ select session {
     id,
     email,
     email_verified,
+    avatar_url,
+    cover_url,
   }
 }

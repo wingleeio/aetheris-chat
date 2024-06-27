@@ -17,6 +17,8 @@ module default {
         };
         hashed_password: str;
         required email_verified: bool;
+        avatar_url: str;
+        cover_url: str;
     }
 
     type OAuth2Account extending Base {

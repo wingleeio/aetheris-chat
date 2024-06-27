@@ -1,7 +1,7 @@
 import { EdgeDBAdapter } from "@/edgedb";
-import { env } from "@/env.server";
-import { database } from "@/lib/database";
 import { Lucia } from "lucia";
+import { database } from "@/lib/database";
+import { env } from "@/env.server";
 
 const adapter = new EdgeDBAdapter(database);
 
@@ -29,5 +29,7 @@ declare module "lucia" {
 interface DatabaseUserAttributes {
     email: string;
     email_verified: boolean;
+    avatar_url?: string;
+    cover_url?: string;
 }
 interface DatabaseSessionAttributes {}
