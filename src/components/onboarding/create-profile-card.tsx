@@ -1,5 +1,6 @@
 "use client";
 
+import { ImageUploadInput } from "@/components/form/image-upload-input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -16,8 +17,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const schema = z.object({
-    display_name: z.string().min(1),
-    tag: z.string().regex(new RegExp("^#[A-Za-z0-9]+$"), "").min(1, ""),
+    display_name: z.string().min(1, "Required field"),
+    tag: z.string().regex(new RegExp("^#[A-Za-z0-9]+$"), "Must be in this format: #tag").min(1, ""),
     avatar: z.string().optional(),
     cover: z.string().optional(),
     bio: z.string().optional(),
@@ -26,26 +27,6 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export function CreateProfileCard() {
-    const coverInputRef = useRef<HTMLInputElement | null>(null);
-    const avatarInputRef = useRef<HTMLInputElement | null>(null);
-
-    const [coverPreview, setCoverPreview] = useState<string | null>(null);
-    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-
-    const handleUpload =
-        (setPreview: (url: string) => void, setFieldValue: (value: string) => void) =>
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            const file = e.target.files?.[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    setPreview(reader.result as string);
-                    setFieldValue(reader.result as string);
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
     const router = useRouter();
     const form = useForm<Schema>({
         resolver: zodResolver(schema),
@@ -63,7 +44,7 @@ export function CreateProfileCard() {
             router.refresh();
         },
         onError: (error) => {
-            toast.error("Error verifying email", {
+            toast.error("Error", {
                 description: error.message,
             });
         },
@@ -90,73 +71,20 @@ export function CreateProfileCard() {
                     </p>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
                         <div className="mb-[32px] relative text-sm">
-                            <div
-                                style={{
-                                    backgroundImage: coverPreview ? `url(${coverPreview})` : undefined,
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center",
-                                }}
+                            <ImageUploadInput
+                                name="cover"
                                 className="bg-indigo-500 h-24 rounded-sm cursor-pointer group position relative"
+                                setImageValue={form.setValue}
                             >
-                                <div
-                                    className="text-white flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-full w-full bg-black/20 gap-2"
-                                    onClick={() => coverInputRef!.current!.click()}
-                                >
-                                    <EditIcon className="h-4 w-4" />
-                                    Change cover photo
-                                </div>
-                                <FormField
-                                    control={form.control}
-                                    name="cover"
-                                    render={({ field }) => (
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={handleUpload(setCoverPreview, (value: string) =>
-                                                form.setValue("cover", value)
-                                            )}
-                                            ref={(e) => {
-                                                field.ref(e);
-                                                coverInputRef.current = e;
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </div>
-                            <div className="bg-background h-[64px] w-[64px] rounded-full p-[3px] absolute bottom-[-20px] left-[8px]">
-                                <div
-                                    style={{
-                                        backgroundImage: avatarPreview ? `url(${avatarPreview})` : undefined,
-                                        backgroundSize: "cover",
-                                        backgroundPosition: "center",
-                                    }}
-                                    className="bg-indigo-500 h-full rounded-full cursor-pointer group transition-all overflow-hidden"
-                                    onClick={() => avatarInputRef!.current!.click()}
-                                >
-                                    <div className="flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-full w-full bg-black/20">
-                                        <EditIcon className="h-4 w-4 text-white" />
-                                    </div>
-                                </div>
-                                <FormField
-                                    control={form.control}
-                                    name="avatar"
-                                    render={({ field }) => (
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={handleUpload(setAvatarPreview, (value: string) =>
-                                                form.setValue("avatar", value)
-                                            )}
-                                            ref={(e) => {
-                                                field.ref(e);
-                                                avatarInputRef.current = e;
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </div>
+                                <EditIcon className="h-4 w-4" />
+                            </ImageUploadInput>
+                            <ImageUploadInput
+                                name="avatar"
+                                className="bg-indigo-500 h-[96px] w-[96px] rounded-full p-[3px] absolute bottom-[-20px] left-[8px] border-[3px] border-background"
+                                setImageValue={form.setValue}
+                            >
+                                <EditIcon className="h-4 w-4 text-white" />
+                            </ImageUploadInput>
                         </div>
                         <div className="grid grid-cols-[3fr_1fr] gap-4">
                             <FormField

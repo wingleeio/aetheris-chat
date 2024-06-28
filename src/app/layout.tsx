@@ -25,7 +25,7 @@ export default function RootLayout({
     return (
         <Providers>
             <html lang="en" className="absolute inset-0">
-                <body className={cn(fontSans.className, "min-h-full flex flex-col")}>
+                <body className={cn(fontSans.className, "min-h-full flex flex-col h-0")}>
                     {children}
                     <Toaster position="bottom-center" />
                 </body>

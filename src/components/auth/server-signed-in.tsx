@@ -13,6 +13,7 @@ type ServerSignedInProps = {
 
 export const ServerSignedIn = ({ children, condition }: ServerSignedInProps) => {
     const session = auth();
+
     if (!session.isAuthenticated) {
         return null;
     }

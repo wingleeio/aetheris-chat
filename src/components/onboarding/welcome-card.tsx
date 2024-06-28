@@ -1,19 +1,10 @@
 "use client";
 
-import { ClientSignedIn } from "@/components/auth/client-signed-in";
-import { ClientSignedOut } from "@/components/auth/client-signed-out";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { client } from "@/lib/client";
 import Link from "next/link";
 
 export const WelcomeCard = () => {
-    const signOut = client.auth.signOut.useMutation({
-        onSuccess: () => {
-            window.location.reload();
-        },
-    });
-
     return (
         <div className="p-4 flex flex-col gap-4 relative">
             <Card className="relative rounded-md shadow-lg border border-solid w-[380px] max-w-full p-3">
@@ -34,30 +25,16 @@ export const WelcomeCard = () => {
                         Next.js
                     </Link>
                     , showcasing many of the features available in the Aetheris framework.
-                    <ClientSignedIn>
-                        {(user) => (
-                            <p className="mt-4">
-                                You are signed in as <span className="font-semibold">{user.profile?.display_name}</span>
-                            </p>
-                        )}
-                    </ClientSignedIn>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
-                    <ClientSignedIn>
-                        <Button className="w-full mt-2" onClick={() => signOut.mutate()}>
-                            Sign out
+                    <Link className="w-full" href="/signIn">
+                        <Button className="w-full">Sign in</Button>
+                    </Link>
+                    <Link className="w-full" href="/signUp">
+                        <Button className="w-full" variant="outline">
+                            Join now
                         </Button>
-                    </ClientSignedIn>
-                    <ClientSignedOut>
-                        <Link className="w-full" href="/signIn">
-                            <Button className="w-full">Sign in</Button>
-                        </Link>
-                        <Link className="w-full" href="/signUp">
-                            <Button className="w-full" variant="outline">
-                                Join now
-                            </Button>
-                        </Link>
-                    </ClientSignedOut>
+                    </Link>
                 </CardFooter>
             </Card>
         </div>
