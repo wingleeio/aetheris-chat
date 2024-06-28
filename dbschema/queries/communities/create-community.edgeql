@@ -2,11 +2,11 @@ select (insert Community {
     name := <str>$name,
     icon_url := <optional str>$icon_url,
     cover_url := <optional str>$cover_url,
-    owner := <User><uuid>global current_user_id,
+    owner := <User>global current_user_id,
     members := (
         select User
         filter .id = global current_user_id
     )
 }) {
-  id
+    id
 }

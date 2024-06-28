@@ -25,17 +25,17 @@ select (insert EmailVerificationCode {
 }
 
 
-export type DeleteEmailVerificationCodesArgs = {
-  readonly "user_id": string;
+export type DeleteSessionArgs = {
+  readonly "session_id": string;
 };
 
-export type DeleteEmailVerificationCodesReturns = {
+export type DeleteSessionReturns = {
   "id": string;
 } | null;
 
-export function deleteEmailVerificationCodes(client: Executor, args: DeleteEmailVerificationCodesArgs): Promise<DeleteEmailVerificationCodesReturns> {
+export function deleteSession(client: Executor, args: DeleteSessionArgs): Promise<DeleteSessionReturns> {
   return client.querySingle(`\
-delete EmailVerificationCode filter .user = <User><uuid>$user_id`, args);
+delete Session filter .session_id = <str>$session_id;`, args);
 
 }
 
@@ -69,6 +69,33 @@ select OAuth2Account {
   user_id := .user.id,
 }
 filter .provider_user_id = <str>$provider_user_id;`, args);
+
+}
+
+
+export type GetUserSessionsArgs = {
+  readonly "user_id": string;
+};
+
+export type GetUserSessionsReturns = Array<{
+  "id": string;
+  "session_id": string;
+  "expires_at": Date;
+  "user": {
+    "id": string;
+  };
+}>;
+
+export function getUserSessions(client: Executor, args: GetUserSessionsArgs): Promise<GetUserSessionsReturns> {
+  return client.query(`\
+select Session {
+  id,
+  session_id,
+  expires_at,
+  user: {
+    id
+  }
+} filter .user = <User><uuid>$user_id;`, args);
 
 }
 
@@ -115,33 +142,6 @@ select session {
     }
   }
 }`, args);
-
-}
-
-
-export type GetUserSessionsArgs = {
-  readonly "user_id": string;
-};
-
-export type GetUserSessionsReturns = Array<{
-  "id": string;
-  "session_id": string;
-  "expires_at": Date;
-  "user": {
-    "id": string;
-  };
-}>;
-
-export function getUserSessions(client: Executor, args: GetUserSessionsArgs): Promise<GetUserSessionsReturns> {
-  return client.query(`\
-select Session {
-  id,
-  session_id,
-  expires_at,
-  user: {
-    id
-  }
-} filter .user = <User><uuid>$user_id;`, args);
 
 }
 
@@ -263,13 +263,13 @@ select (insert Community {
     name := <str>$name,
     icon_url := <optional str>$icon_url,
     cover_url := <optional str>$cover_url,
-    owner := <User><uuid>global current_user_id,
+    owner := <User>global current_user_id,
     members := (
         select User
         filter .id = global current_user_id
     )
 }) {
-  id
+    id
 }`, args);
 
 }
@@ -286,48 +286,80 @@ export type GetMyCommunitiesReturns = Array<{
 export function getMyCommunities(client: Executor): Promise<GetMyCommunitiesReturns> {
   return client.query(`\
 select Community {
-  name,
-  icon_url,
-  cover_url,
-  member_count := count(.members)
+    name,
+    icon_url,
+    cover_url,
+    member_count := count(.members)
 }
-filter .members = <User><uuid>global current_user_id`);
+filter .members = <User>global current_user_id`);
 
 }
 
 
-export type CreateOauthAccountArgs = {
-  readonly "provider": string;
-  readonly "provider_user_id": string;
-  readonly "user_id": string;
+export type CreateProfileArgs = {
+  readonly "display_name": string;
+  readonly "tag": string;
+  readonly "bio"?: string | null;
+  readonly "avatar_url"?: string | null;
+  readonly "cover_url"?: string | null;
 };
 
-export type CreateOauthAccountReturns = {
+export type CreateProfileReturns = {
   "id": string;
 };
 
-export function createOauthAccount(client: Executor, args: CreateOauthAccountArgs): Promise<CreateOauthAccountReturns> {
+export function createProfile(client: Executor, args: CreateProfileArgs): Promise<CreateProfileReturns> {
   return client.queryRequiredSingle(`\
-insert OAuth2Account {
-  provider := <str>$provider,
-  provider_user_id := <str>$provider_user_id,
-  user := <User><uuid>$user_id,
+insert Profile {
+    display_name := <str>$display_name,
+    tag := <str>$tag,
+    bio := <optional str>$bio,
+    avatar_url := <optional str>$avatar_url,
+    cover_url := <optional str>$cover_url,
+    user := <User>global current_user_id
 }`, args);
 
 }
 
 
-export type DeleteSessionArgs = {
-  readonly "session_id": string;
+export type UpdateProfileArgs = {
+  readonly "display_name"?: string | null;
+  readonly "tag"?: string | null;
+  readonly "bio"?: string | null;
+  readonly "avatar_url"?: string | null;
+  readonly "cover_url"?: string | null;
 };
 
-export type DeleteSessionReturns = {
+export type UpdateProfileReturns = {
   "id": string;
 } | null;
 
-export function deleteSession(client: Executor, args: DeleteSessionArgs): Promise<DeleteSessionReturns> {
+export function updateProfile(client: Executor, args: UpdateProfileArgs): Promise<UpdateProfileReturns> {
   return client.querySingle(`\
-delete Session filter .session_id = <str>$session_id;`, args);
+update Profile
+filter .id = global current_user_id
+set {
+    display_name := <optional str>$display_name ?? .display_name,
+    tag := <optional str>$tag ?? .tag,
+    bio := <optional str>$bio ?? .bio,
+    avatar_url := <optional str>$avatar_url ?? .avatar_url,
+    cover_url := <optional str>$cover_url ?? .cover_url,
+}`, args);
+
+}
+
+
+export type DeleteEmailVerificationCodesArgs = {
+  readonly "user_id": string;
+};
+
+export type DeleteEmailVerificationCodesReturns = {
+  "id": string;
+} | null;
+
+export function deleteEmailVerificationCodes(client: Executor, args: DeleteEmailVerificationCodesArgs): Promise<DeleteEmailVerificationCodesReturns> {
+  return client.querySingle(`\
+delete EmailVerificationCode filter .user = <User><uuid>$user_id`, args);
 
 }
 
@@ -360,6 +392,27 @@ insert User {
   email := <str>$email,
   hashed_password := <optional str>$hashed_password,
   email_verified := <bool>$email_verified,
+}`, args);
+
+}
+
+
+export type CreateOauthAccountArgs = {
+  readonly "provider": string;
+  readonly "provider_user_id": string;
+  readonly "user_id": string;
+};
+
+export type CreateOauthAccountReturns = {
+  "id": string;
+};
+
+export function createOauthAccount(client: Executor, args: CreateOauthAccountArgs): Promise<CreateOauthAccountReturns> {
+  return client.queryRequiredSingle(`\
+insert OAuth2Account {
+  provider := <str>$provider,
+  provider_user_id := <str>$provider_user_id,
+  user := <User><uuid>$user_id,
 }`, args);
 
 }

@@ -8,7 +8,7 @@ type Queries = typeof queries;
 
 type DatabaseFunctions<T> = {
     readonly [K in keyof T]: T[K] extends (client: Client, args: infer A) => infer R
-        ? {} extends A
+        ? unknown extends A
             ? () => R
             : (args: A) => R
         : never;

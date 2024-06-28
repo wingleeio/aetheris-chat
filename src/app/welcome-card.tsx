@@ -6,14 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { client } from "@/lib/client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-export const TestComponent = () => {
-    const router = useRouter();
-
+export const WelcomeCard = () => {
     const signOut = client.auth.signOut.useMutation({
         onSuccess: () => {
-            router.refresh();
+            window.location.reload();
         },
     });
 
@@ -37,8 +34,20 @@ export const TestComponent = () => {
                         Next.js
                     </Link>
                     , showcasing many of the features available in the Aetheris framework.
+                    <ClientSignedIn>
+                        {(user) => (
+                            <p className="mt-4">
+                                You are signed in as <span className="font-semibold">{user.profile?.display_name}</span>
+                            </p>
+                        )}
+                    </ClientSignedIn>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
+                    <ClientSignedIn>
+                        <Button className="w-full mt-2" onClick={() => signOut.mutate()}>
+                            Sign out
+                        </Button>
+                    </ClientSignedIn>
                     <ClientSignedOut>
                         <Link className="w-full" href="/signIn">
                             <Button className="w-full">Sign in</Button>
@@ -49,11 +58,6 @@ export const TestComponent = () => {
                             </Button>
                         </Link>
                     </ClientSignedOut>
-                    <ClientSignedIn>
-                        <Button className="w-full" onClick={() => signOut.mutate()}>
-                            Sign out
-                        </Button>
-                    </ClientSignedIn>
                 </CardFooter>
             </Card>
         </div>

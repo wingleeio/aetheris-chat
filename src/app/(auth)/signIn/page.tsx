@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { RiArrowRightLine } from "react-icons/ri";
 import { toast } from "sonner";
@@ -34,7 +34,6 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export default function LoginPage() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const form = useForm<Schema>({
         resolver: zodResolver(schema),
@@ -46,7 +45,7 @@ export default function LoginPage() {
 
     const signIn = client.auth.signIn.useMutation({
         onSuccess: () => {
-            router.refresh();
+            window.location.reload();
         },
         onError: (error) => {
             toast.error("Error signing in", {

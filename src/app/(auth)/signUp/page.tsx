@@ -42,7 +42,6 @@ const schema = z
     });
 
 export default function RegisterForm() {
-    const router = useRouter();
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -54,7 +53,7 @@ export default function RegisterForm() {
 
     const signUp = client.auth.signUp.useMutation({
         onSuccess: () => {
-            router.refresh();
+            window.location.reload();
         },
         onError: (error) => {
             toast.error("Error signing in", {

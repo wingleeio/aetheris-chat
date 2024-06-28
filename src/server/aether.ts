@@ -1,5 +1,6 @@
 import { database } from "@/lib/database";
 import { events } from "@/lib/events";
+import { files } from "@/lib/files";
 import { logger } from "@/lib/logger";
 import { ApiError } from "@/server/error";
 import { lucia } from "@/services/lucia";
@@ -12,6 +13,7 @@ export const createContext = (req: IncomingMessage) => ({
     logger,
     database,
     events,
+    files,
     service: {
         lucia,
         resend,
