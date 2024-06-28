@@ -10,7 +10,6 @@ select session {
     email,
     email_verified,
     profile: {
-      id,
       avatar_url,
       cover_url,
       display_name,

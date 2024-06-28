@@ -25,17 +25,32 @@ select (insert EmailVerificationCode {
 }
 
 
-export type DeleteSessionArgs = {
-  readonly "session_id": string;
+export type DeleteEmailVerificationCodesArgs = {
+  readonly "user_id": string;
 };
 
-export type DeleteSessionReturns = {
+export type DeleteEmailVerificationCodesReturns = {
   "id": string;
 } | null;
 
-export function deleteSession(client: Executor, args: DeleteSessionArgs): Promise<DeleteSessionReturns> {
+export function deleteEmailVerificationCodes(client: Executor, args: DeleteEmailVerificationCodesArgs): Promise<DeleteEmailVerificationCodesReturns> {
   return client.querySingle(`\
-delete Session filter .session_id = <str>$session_id;`, args);
+delete EmailVerificationCode filter .user = <User><uuid>$user_id`, args);
+
+}
+
+
+export type DeleteUserSessionsArgs = {
+  readonly "user_id": string;
+};
+
+export type DeleteUserSessionsReturns = Array<{
+  "id": string;
+}>;
+
+export function deleteUserSessions(client: Executor, args: DeleteUserSessionsArgs): Promise<DeleteUserSessionsReturns> {
+  return client.query(`\
+delete Session filter .user = <User><uuid>$user_id;`, args);
 
 }
 
@@ -58,21 +73,6 @@ filter .provider_user_id = <str>$provider_user_id;`, args);
 }
 
 
-export type DeleteUserSessionsArgs = {
-  readonly "user_id": string;
-};
-
-export type DeleteUserSessionsReturns = Array<{
-  "id": string;
-}>;
-
-export function deleteUserSessions(client: Executor, args: DeleteUserSessionsArgs): Promise<DeleteUserSessionsReturns> {
-  return client.query(`\
-delete Session filter .user = <User><uuid>$user_id;`, args);
-
-}
-
-
 export type GetSessionAndUserArgs = {
   readonly "session_id": string;
 };
@@ -86,7 +86,6 @@ export type GetSessionAndUserReturns = {
     "email": string;
     "email_verified": boolean;
     "profile": {
-      "id": string;
       "avatar_url": string | null;
       "cover_url": string | null;
       "display_name": string;
@@ -109,7 +108,6 @@ select session {
     email,
     email_verified,
     profile: {
-      id,
       avatar_url,
       cover_url,
       display_name,
@@ -234,7 +232,6 @@ set {
 
 
 export type VerifyEmailArgs = {
-  readonly "user_id": string;
   readonly "code": string;
 };
 
@@ -243,21 +240,58 @@ export type VerifyEmailReturns = boolean | null;
 export function verifyEmail(client: Executor, args: VerifyEmailArgs): Promise<VerifyEmailReturns> {
   return client.querySingle(`\
 with
-  email_verification_code := (select EmailVerificationCode filter .user = <User><uuid>$user_id),
+  email_verification_code := (select EmailVerificationCode filter .user = <User><uuid>global current_user_id),
   expired := email_verification_code.expires_at < datetime_current()
 select email_verification_code.code = <str>$code and not expired;`, args);
 
 }
 
 
+export type CreateCommunityArgs = {
+  readonly "name": string;
+  readonly "icon_url"?: string | null;
+  readonly "cover_url"?: string | null;
+};
 
-export type DeleteExpiredSessionsReturns = Array<{
+export type CreateCommunityReturns = {
   "id": string;
+};
+
+export function createCommunity(client: Executor, args: CreateCommunityArgs): Promise<CreateCommunityReturns> {
+  return client.queryRequiredSingle(`\
+select (insert Community {
+    name := <str>$name,
+    icon_url := <optional str>$icon_url,
+    cover_url := <optional str>$cover_url,
+    owner := <User><uuid>global current_user_id,
+    members := (
+        select User
+        filter .id = global current_user_id
+    )
+}) {
+  id
+}`, args);
+
+}
+
+
+
+export type GetMyCommunitiesReturns = Array<{
+  "name": string;
+  "icon_url": string | null;
+  "cover_url": string | null;
+  "member_count": number;
 }>;
 
-export function deleteExpiredSessions(client: Executor): Promise<DeleteExpiredSessionsReturns> {
+export function getMyCommunities(client: Executor): Promise<GetMyCommunitiesReturns> {
   return client.query(`\
-delete Session filter .expires_at < datetime_current();`);
+select Community {
+  name,
+  icon_url,
+  cover_url,
+  member_count := count(.members)
+}
+filter .members = <User><uuid>global current_user_id`);
 
 }
 
@@ -283,17 +317,29 @@ insert OAuth2Account {
 }
 
 
-export type DeleteEmailVerificationCodesArgs = {
-  readonly "user_id": string;
+export type DeleteSessionArgs = {
+  readonly "session_id": string;
 };
 
-export type DeleteEmailVerificationCodesReturns = {
+export type DeleteSessionReturns = {
   "id": string;
 } | null;
 
-export function deleteEmailVerificationCodes(client: Executor, args: DeleteEmailVerificationCodesArgs): Promise<DeleteEmailVerificationCodesReturns> {
+export function deleteSession(client: Executor, args: DeleteSessionArgs): Promise<DeleteSessionReturns> {
   return client.querySingle(`\
-delete EmailVerificationCode filter .user = <User><uuid>$user_id`, args);
+delete Session filter .session_id = <str>$session_id;`, args);
+
+}
+
+
+
+export type DeleteExpiredSessionsReturns = Array<{
+  "id": string;
+}>;
+
+export function deleteExpiredSessions(client: Executor): Promise<DeleteExpiredSessionsReturns> {
+  return client.query(`\
+delete Session filter .expires_at < datetime_current();`);
 
 }
 

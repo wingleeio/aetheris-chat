@@ -108,7 +108,6 @@ export const auth = {
             await database.transaction(async (tx) => {
                 const verified = await tx.verifyEmail({
                     code: input.code,
-                    user_id: user.id,
                 });
 
                 if (!verified) {

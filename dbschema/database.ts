@@ -1,18 +1,25 @@
-import { Client, Executor } from "edgedb";
 import type { Adapter, DatabaseSession, DatabaseUser } from "lucia";
+import { Client, Executor } from "edgedb";
 import * as queries from "./queries";
 
 export type * from "./queries";
 
 type Queries = typeof queries;
 
-type Database<T> = {
+type DatabaseFunctions<T> = {
     readonly [K in keyof T]: T[K] extends (client: Client, args: infer A) => infer R
         ? {} extends A
             ? () => R
             : (args: A) => R
         : never;
-} & {
+};
+
+type Database<T> = DatabaseFunctions<T> & {
+    transaction: <R>(action: (tx: DatabaseTransaction<T>) => Promise<R>) => Promise<R>;
+    withGlobals: (globals: { [name: string]: any }) => DatabaseWithGlobals<T>;
+};
+
+type DatabaseWithGlobals<T> = DatabaseFunctions<T> & {
     transaction: <R>(action: (tx: DatabaseTransaction<T>) => Promise<R>) => Promise<R>;
 };
 
@@ -46,6 +53,12 @@ export const createDatabase = (client: Client): Database<Queries> => {
                             const txDatabase = createTransactionProxy(tx);
                             return await action(txDatabase);
                         });
+                    };
+                }
+
+                if (prop === "withGlobals") {
+                    return (globals: { [name: string]: any }) => {
+                        return createProxy(client.withGlobals(globals));
                     };
                 }
 

@@ -29,11 +29,11 @@ declare module "lucia" {
 interface DatabaseUserAttributes {
     email: string;
     email_verified: boolean;
-    profile?: {
-        avatar_url?: string;
-        cover_url?: string;
+    profile: {
+        avatar_url: string | null;
+        cover_url: string | null;
         display_name: string;
         tag: string;
-    };
+    } | null;
 }
 interface DatabaseSessionAttributes {}

@@ -1,4 +1,6 @@
 module default {
+    global current_user_id: uuid;
+    
     abstract type Base {
         required created_at: datetime {
             default := datetime_current();
@@ -60,5 +62,45 @@ module default {
         required code: str;
         required expires_at: datetime;
         index on ((.user));
+    }
+
+    type Community extending Base {
+        multi members: User;
+        multi channels := .<community[is Channel];
+        multi messages := .<community[is Message];
+        multi roles := .<community[is CommunityRole];
+        icon_url: str;
+        cover_url: str;
+        required name: str;
+        required owner: User;
+    }
+
+    scalar type CommunityPermission extending enum<
+        Admin,
+        ManageRoles,
+        ManageChannels,
+        ManageMessages,
+        ManageMembers,
+        SendMessages,
+        CreateInvites,
+    >;
+
+    type CommunityRole extending Base {
+        required community: Community;
+        required name: str;
+        required color: str;
+        required multi permissions: CommunityPermission;
+    }
+
+    type Channel extending Base {
+        required community: Community;
+        multi messages := .<channel[is Message];
+    }
+
+    type Message extending Base {
+        required sender: User;
+        required content: str;
+        community: Community;
+        channel: Channel;
     }
 }

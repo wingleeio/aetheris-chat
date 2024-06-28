@@ -1,13 +1,17 @@
 import { database } from "@/lib/database";
+import { events } from "@/lib/events";
 import { logger } from "@/lib/logger";
 import { ApiError } from "@/server/error";
 import { lucia } from "@/services/lucia";
 import { resend } from "@/services/resend";
 import { createAetheris } from "@aetheris/server";
+import { IncomingMessage } from "http";
 
-export const createContext = () => ({
+export const createContext = (req: IncomingMessage) => ({
+    ip: req.socket.remoteAddress,
     logger,
     database,
+    events,
     service: {
         lucia,
         resend,
@@ -17,8 +21,12 @@ export const createContext = () => ({
 const aether = createAetheris<typeof createContext>();
 
 export const action = aether
-    .use(({ logger, path, input }) => {
-        logger.info(input, `Received request to ${path}`);
+    .use(({ logger, path, ip }) => {
+        let childLogger = logger.child({ path, ip });
+        childLogger.info("Received request");
+        return {
+            logger: childLogger,
+        };
     })
     .use(async ({ service, cookies }) => {
         const sessionId = cookies.get(service.lucia.sessionCookieName);
@@ -51,9 +59,20 @@ export const action = aether
         };
     });
 
-export const userRequiredAction = action.use(({ user, sessionId }) => {
+export const userRequiredAction = action.use(({ user, sessionId, database }) => {
     if (!user || !sessionId) {
         throw new ApiError(401, "You must be signed in to perform this action");
     }
-    return { user, sessionId };
+
+    return {
+        user,
+        sessionId,
+        database: database.withGlobals({ current_user_id: user.id }),
+    };
+});
+
+export const userVerifiedAction = userRequiredAction.use(({ user }) => {
+    if (!user.email_verified) {
+        throw new ApiError(403, "You must verify your email to perform this action");
+    }
 });
