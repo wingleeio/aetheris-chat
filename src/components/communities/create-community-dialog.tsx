@@ -1,3 +1,5 @@
+"use client";
+
 import { ImageUploadInput } from "@/components/form/image-upload-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,10 +20,8 @@ import { EditIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { RiArrowRightLine } from "react-icons/ri";
 import { toast } from "sonner";
 import { z } from "zod";
-import { createProfile } from "../../../dbschema/queries";
 
 const schema = z.object({
     name: z.string().min(1, "Required field"),
@@ -45,6 +45,13 @@ export const CreateCommunityDialog = ({ children }: { children: React.ReactNode 
         },
     });
 
+    const handleOpenChange = (open: boolean) => {
+        if (!open) {
+            form.reset();
+        }
+        setOpen(open);
+    };
+
     const createCommunity = client.communities.createCommunity.useMutation({
         onSuccess: () => {
             router.refresh();
@@ -61,7 +68,7 @@ export const CreateCommunityDialog = ({ children }: { children: React.ReactNode 
     const onSubmit = async (data: z.infer<typeof schema>) => createCommunity.mutate(data);
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -115,12 +122,8 @@ export const CreateCommunityDialog = ({ children }: { children: React.ReactNode 
 
                         <DialogFooter>
                             <Button type="submit" className="w-full gap-2" disabled={createCommunity.isPending}>
-                                <span>Continue</span>
-                                {createCommunity.isPending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                    <RiArrowRightLine />
-                                )}
+                                <span>Create community</span>
+                                {createCommunity.isPending ?? <Loader2 className="h-4 w-4 animate-spin" />}
                             </Button>
                         </DialogFooter>
                     </form>
