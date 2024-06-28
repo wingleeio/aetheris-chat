@@ -71,6 +71,7 @@ module default {
         multi roles := .<community[is CommunityRole];
         icon_url: str;
         cover_url: str;
+        required about: str;
         required name: str;
         required owner: User;
     }

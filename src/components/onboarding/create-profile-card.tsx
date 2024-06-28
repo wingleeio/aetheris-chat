@@ -10,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { EditIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RiArrowRightLine } from "react-icons/ri";
 import { toast } from "sonner";

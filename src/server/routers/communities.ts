@@ -6,6 +6,7 @@ export const communities = {
     createCommunity: userVerifiedAction.handler({
         input: z.object({
             name: z.string(),
+            about: z.string(),
             icon: z.string().optional(),
             cover: z.string().optional(),
         }),
@@ -13,6 +14,7 @@ export const communities = {
             const community = await database
                 .createCommunity({
                     name: input.name,
+                    about: input.about,
                     icon_url: input.icon && (await files.upload("community-icon", input.icon)),
                     cover_url: input.cover && (await files.upload("community-cover", input.cover)),
                 })
@@ -28,6 +30,11 @@ export const communities = {
     getMyCommunities: userRequiredAction.handler({
         resolve: async ({ database }) => {
             return database.getMyCommunities();
+        },
+    }),
+    getCommunities: userRequiredAction.handler({
+        resolve: async ({ database }) => {
+            return database.getCommunities();
         },
     }),
 };

@@ -40,7 +40,7 @@ export default async function IndexLayout({
                 </div>
             </ServerSignedIn>
             <ServerSignedIn condition={(user) => user.email_verified && !!user.profile}>
-                <div className={cn("h-full w-full")}>{children}</div>
+                <div className={cn("h-full w-full bg-muted")}>{children}</div>
             </ServerSignedIn>
         </Fragment>
     );
