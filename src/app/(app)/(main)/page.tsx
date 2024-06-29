@@ -1,11 +1,12 @@
+import { FaCompass, FaPlusCircle } from "react-icons/fa";
+
 import { CreateCommunityDialog } from "@/components/communities/create-community-dialog";
 import Link from "next/link";
-import { FaCompass, FaPlusCircle } from "react-icons/fa";
 
 export default function Page() {
     return (
-        <div className="max-w-[600px]">
-            <div className="grid grid-cols-2 gap-4">
+        <div className="h-full flex items-center justify-center ">
+            <div className="max-w-[600px] grid grid-cols-2 gap-4">
                 <Link
                     href="/discover"
                     className="p-4 border border-muted rounded-sm cursor-pointer group flex gap-4 text-sm text-muted-foreground hover:shadow-sm"

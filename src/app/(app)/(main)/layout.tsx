@@ -1,8 +1,8 @@
-import { ServerSignedIn } from "@/components/auth/server-signed-in";
-import { Navigation } from "@/components/shared/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FaCompass, FaHome } from "react-icons/fa";
 
-import { FaHome, FaCompass } from "react-icons/fa";
+import { Navigation } from "@/components/shared/navigation";
+import { ServerSignedIn } from "@/components/auth/server-signed-in";
 
 export default function Layout({
     children,
@@ -47,9 +47,7 @@ export default function Layout({
                     )}
                 </ServerSignedIn>
             </div>
-            <div className="h-full flex items-center justify-center bg-background rounded-sm shadow-sm col-span-8">
-                {children}
-            </div>
+            <div className="p-4 bg-background rounded-sm shadow-sm col-span-8">{children}</div>
         </div>
     );
 }
