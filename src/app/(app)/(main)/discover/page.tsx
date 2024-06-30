@@ -6,7 +6,7 @@ export default async function Page() {
     await helpers.communities.getCommunities.prefetch();
     return (
         <HydrationBoundary state={helpers.dehydrate()}>
-            <div className="max-w-[900px] w-full">
+            <div className="w-full">
                 <CommunitiesList />
             </div>
         </HydrationBoundary>
