@@ -87,7 +87,7 @@ export const CreateCommunityDialog = ({ children }: { children: React.ReactNode 
                             </ImageUploadInput>
                             <ImageUploadInput
                                 name="icon"
-                                className="bg-indigo-500 h-[96px] w-[96px] rounded-full p-[3px] absolute bottom-[-20px] left-[8px] border-[3px] border-background"
+                                className="bg-indigo-500 h-[96px] w-[96px] rounded-full absolute bottom-[-20px] left-[8px] border-[3px] border-background"
                                 setImageValue={form.setValue}
                             >
                                 <EditIcon className="h-4 w-4 text-white" />

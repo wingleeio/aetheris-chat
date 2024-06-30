@@ -2,24 +2,24 @@
 # yarn lockfile v1
 
 
-"@aetheris/client@^0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@aetheris/client/-/client-0.0.17.tgz#4bdcc8cdd92cd40ae477601ac9430fc29def42e4"
-  integrity sha512-iHOz26blFjcJP44jnggcAVsNdwIKXOLaykyyjUunlw9XA/JsFVwPwS0fZPoOMGDlcl5ihmbe2xoas4+qYFcmwQ==
+"@aetheris/client@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@aetheris/client/-/client-0.0.19.tgz#dfab6d10176722a562afcfe31fbb69e106779c56"
+  integrity sha512-cpNYDtJeYciU+P9KtWyVkGv9V2OrZBZI/aTj5+BA36sE64SfMrR/xWOcIYlQvV09cnIYnxfGVR5099lUdu3Gug==
 
-"@aetheris/react-query@^0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@aetheris/react-query/-/react-query-0.0.17.tgz#97a22af4c36d4d3e8d5f725d9c96ad9a30ae5052"
-  integrity sha512-mssxNVkXa7P6vs2NcsAlD0CzaqOIdd+gwc2aXls5miazBzedMBkkBJFMwLYsdcZQwoS+k+N+/YTGKRgLecFD7A==
+"@aetheris/react-query@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@aetheris/react-query/-/react-query-0.0.19.tgz#8d4eef878770614e0ea83b87d96097eaa5adbf39"
+  integrity sha512-ilqDOYpMPQMfLm7Dfw2Nn/FsaJA3V7LlVVYDtCZ9T67gzM3Xezlgtwyo9JlnheejPxYZpJ39pO2lncEVObfb1g==
   dependencies:
     "@tanstack/react-query" "^5.45.0"
     react "^18.3.1"
     react-dom "^18.3.1"
 
-"@aetheris/server@^0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@aetheris/server/-/server-0.0.17.tgz#9a588885c175ceae6dd38206bd196def8c494959"
-  integrity sha512-S7XipqjjUpXEU+pQsyp+WIldjxUeUok58SzNsKqHM/WX4rN/pk3Oi1szeHT390qDCoENoFFzPqZO+DNE82hnNg==
+"@aetheris/server@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@aetheris/server/-/server-0.0.19.tgz#5d9ad007c460f6856beea599024c32dd573c5f4c"
+  integrity sha512-bbiNxMsl9K6taL2R7pGxWZOG0fVJowKym0s1o0U5h4+jGMlPCpUkz3Mi+Pn+rOIDrGyQBsqe8enwnkRgxIkizQ==
   dependencies:
     ws "^8.17.1"
 

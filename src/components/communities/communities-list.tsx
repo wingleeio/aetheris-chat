@@ -1,11 +1,7 @@
 "use client";
 
-import { FaUsers } from "react-icons/fa";
-import { RiBarChart2Fill } from "react-icons/ri";
 import { Skeleton } from "@/components/ui/skeleton";
 import { client } from "@/lib/client";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { CommunityListItem } from "@/components/communities/community-list-item";
 
 export const CommunitiesList = () => {
@@ -26,7 +22,9 @@ export const CommunitiesList = () => {
     return (
         <div
             className="grid grid-flow-row auto-cols-fr gap-2"
-            style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}
+            style={{
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            }}
         >
             {data.map((community) => (
                 <CommunityListItem key={community.id} community={community} />

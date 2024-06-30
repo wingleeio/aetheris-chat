@@ -94,8 +94,10 @@ module default {
     }
 
     type Channel extending Base {
+        required name: str;
         required community: Community;
         multi messages := .<channel[is Message];
+        multi allowed_roles: CommunityRole;
     }
 
     type Message extending Base {

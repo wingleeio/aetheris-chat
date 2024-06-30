@@ -3,6 +3,7 @@ import { RiBarChart2Fill } from "react-icons/ri";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
+import Link from "next/link";
 
 export const CommunityListItem = ({
     community,
@@ -19,10 +20,12 @@ export const CommunityListItem = ({
         activityMessage = "Medium activity";
         activityColor = "text-yellow-500";
     }
+
     return (
-        <div
+        <Link
             key={community.id}
             className="rounded-sm overflow-hidden border border-muted text-sm text-muted-foreground cursor-pointer hover:shadow-sm"
+            href={`/community/${community.id}`}
         >
             <div
                 style={{
@@ -62,6 +65,6 @@ export const CommunityListItem = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
