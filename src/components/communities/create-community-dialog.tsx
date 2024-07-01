@@ -1,7 +1,5 @@
 "use client";
 
-import { ImageUploadInput } from "@/components/form/image-upload-input";
-import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -11,17 +9,21 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { EditIcon, Loader2 } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { client, useAetherisContext } from "@/lib/client";
+
+import { Button } from "@/components/ui/button";
+import { ImageUploadInput } from "@/components/form/image-upload-input";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { client } from "@/lib/client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { EditIcon, Loader2 } from "lucide-react";
+import { helpers } from "@/lib/api";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const schema = z.object({
     name: z.string().min(1, "Required field"),
@@ -33,6 +35,7 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export const CreateCommunityDialog = ({ children }: { children: React.ReactNode }) => {
+    const { queryClient } = useAetherisContext();
     const [open, setOpen] = useState(false);
     const router = useRouter();
     const form = useForm<Schema>({
@@ -56,6 +59,9 @@ export const CreateCommunityDialog = ({ children }: { children: React.ReactNode 
         onSuccess: () => {
             router.refresh();
             setOpen(false);
+            queryClient.invalidateQueries({
+                queryKey: helpers.communities.getMyCommunities.getQueryKey(),
+            });
             form.reset();
         },
         onError: (error) => {

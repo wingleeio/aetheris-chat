@@ -6,8 +6,10 @@ export default async function Page() {
     await helpers.communities.getCommunities.prefetch();
     return (
         <HydrationBoundary state={helpers.dehydrate()}>
-            <div className="w-full">
-                <CommunitiesList />
+            <div className="w-full relative h-full">
+                <div className="absolute inset-0 overflow-auto">
+                    <CommunitiesList />
+                </div>
             </div>
         </HydrationBoundary>
     );

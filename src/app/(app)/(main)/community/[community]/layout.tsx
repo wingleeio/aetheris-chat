@@ -1,22 +1,22 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { ServerSignedIn } from "@/components/auth/server-signed-in";
-import { CommunityBanner } from "@/components/communities/community-banner";
 import { ChannelsList } from "@/components/channels/channels-list";
+import { CommunityBanner } from "@/components/communities/community-banner";
+import { ServerSignedIn } from "@/components/auth/server-signed-in";
 
 export default function Layout({
     children,
-    params: { community, channel },
+    params: { community },
 }: Readonly<{
     children: React.ReactNode;
-    params: { community: string; channel?: string };
+    params: { community: string };
 }>) {
     return (
         <div className="h-full p-2 grid grid-cols-10 gap-2">
             <div className="col-span-2 flex flex-col">
                 <div className="flex-grow text-sm flex flex-col gap-1">
                     <CommunityBanner id={community} />
-                    <ChannelsList id={community} channelId={channel} />
+                    <ChannelsList id={community} />
                 </div>
                 <ServerSignedIn>
                     {(user) => (

@@ -1,11 +1,11 @@
-import { ClientProvider } from "@/components/providers/client-provider";
-import type { Metadata } from "next";
 import "./globals.css";
-import { Inter as FontSans } from "next/font/google";
 
-import { cn } from "@/lib/utils";
-import { Toaster } from "@/components/ui/sonner";
+import { ClientProvider } from "@/components/providers/client-provider";
+import { Inter as FontSans } from "next/font/google";
+import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
 
 const fontSans = FontSans({
     subsets: ["latin"],
@@ -23,13 +23,13 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <Providers>
-            <html lang="en" className="absolute inset-0">
-                <body className={cn(fontSans.className, "min-h-full flex flex-col h-0")}>
+        <html lang="en" className="absolute inset-0" suppressHydrationWarning>
+            <body className={cn(fontSans.className, "min-h-full flex flex-col h-0")}>
+                <Providers>
                     {children}
                     <Toaster position="bottom-center" />
-                </body>
-            </html>
-        </Providers>
+                </Providers>
+            </body>
+        </html>
     );
 }

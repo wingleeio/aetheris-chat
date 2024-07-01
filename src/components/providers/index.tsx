@@ -1,5 +1,6 @@
-import { ClientProvider } from "@/components/providers/client-provider";
 import { AuthProvider } from "@/hooks/use-auth";
+import { ClientProvider } from "@/components/providers/client-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { auth } from "@/lib/auth";
 
 type OmitChildren<P> = Omit<P, "children">;
@@ -20,6 +21,14 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     const CombinedProvider = combineProviders([
         [ClientProvider, {}],
         [AuthProvider, { session: auth() }],
+        [
+            ThemeProvider,
+            {
+                attribute: "class",
+                defaultTheme: "light",
+                enableSystem: true,
+            },
+        ],
     ]);
     return <CombinedProvider>{children}</CombinedProvider>;
 };

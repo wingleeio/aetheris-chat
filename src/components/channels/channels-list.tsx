@@ -1,12 +1,14 @@
 "use client";
 
-import { client } from "@/lib/client";
-import { cn } from "@/lib/utils";
+import { FaHashtag } from "react-icons/fa";
 import { Fragment } from "react";
 import Link from "next/link";
-import { FaHashtag } from "react-icons/fa";
+import { client } from "@/lib/client";
+import { cn } from "@/lib/utils";
+import { useParams } from "next/navigation";
 
-export const ChannelsList = ({ id, channelId }: { id: string; channelId?: string }) => {
+export const ChannelsList = ({ id }: { id: string }) => {
+    const params = useParams<{ channel?: string }>();
     const { data } = client.channels.getChannels.useQuery({
         input: {
             community_id: id,
@@ -21,7 +23,7 @@ export const ChannelsList = ({ id, channelId }: { id: string; channelId?: string
                     href={`/community/${id}/channel/${channel.id}`}
                     className={cn(
                         "flex gap-4 items-center text-muted-foreground cursor-pointer hover:bg-background transition-all px-4 py-2",
-                        channel.id === channelId ? "bg-background" : ""
+                        channel.id === params.channel ? "bg-background" : ""
                     )}
                 >
                     <FaHashtag /> {channel.name}

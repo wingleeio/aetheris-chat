@@ -14,7 +14,7 @@ export default function Layout({
             <div className="col-span-2 flex flex-col">
                 <div className="flex-grow text-sm flex flex-col gap-1">
                     <Navigation
-                        baseClassName="flex gap-4 items-center text-muted-foreground cursor-pointer hover:bg-background transition-all px-4 py-2"
+                        baseClassName="flex gap-4 items-center text-muted-foreground cursor-pointer hover:bg-background transition-all px-4 py-2 rounded-sm"
                         activeClassName="bg-background"
                         items={[
                             {
