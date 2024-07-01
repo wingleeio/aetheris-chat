@@ -3,6 +3,16 @@ import { ApiError } from "@/server/error";
 import { z } from "zod";
 
 export const user = {
+    getProfile: userVerifiedAction.handler({
+        input: z.object({
+            user_id: z.string(),
+        }),
+        resolve: async ({ database, input }) => {
+            return database.getProfile({
+                user_id: input.user_id,
+            });
+        },
+    }),
     createProfile: userVerifiedAction.handler({
         input: z.object({
             display_name: z.string(),

@@ -56,12 +56,12 @@ export const CreateCommunityDialog = ({ children }: { children: React.ReactNode 
     };
 
     const createCommunity = client.communities.createCommunity.useMutation({
-        onSuccess: () => {
-            router.refresh();
+        onSuccess: (community) => {
             setOpen(false);
             queryClient.invalidateQueries({
                 queryKey: helpers.communities.getMyCommunities.getQueryKey(),
             });
+            router.push("/community/" + community.id);
             form.reset();
         },
         onError: (error) => {
