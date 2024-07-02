@@ -1,0 +1,1 @@
+delete Session filter .session_id = <str>$session_id;

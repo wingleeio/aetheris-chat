@@ -1,0 +1,1 @@
+delete Session filter .user = <User><uuid>$user_id;
