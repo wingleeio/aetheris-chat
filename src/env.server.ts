@@ -4,7 +4,7 @@ import { env as clientEnv } from "@/env.client";
 import { z } from "zod";
 
 const schema = z.object({
-    PORT: z.number().default(3000),
+    PORT: z.string().default("3000"),
     HOSTNAME: z.string().default("localhost"),
     AUTH_HEADER: z.string().default("x-session-data"),
     AUTH_COOKIE: z.string().default("aetheris-chat-session"),

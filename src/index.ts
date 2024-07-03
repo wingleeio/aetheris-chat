@@ -12,7 +12,7 @@ import { WebSocket } from "ws";
 
 const nextApp = next({
     dev: env.NODE_ENV !== "production",
-    port: env.PORT,
+    port: Number(env.PORT),
     hostname: env.HOSTNAME,
 });
 const nextHandler = nextApp.getRequestHandler();
@@ -33,7 +33,7 @@ nextApp.prepare().then(() => {
         return nextHandler(req, res);
     });
 
-    const wss = new WebSocket.Server(env.NODE_ENV === "production" ? { server } : { port: env.PORT + 1 });
+    const wss = new WebSocket.Server(env.NODE_ENV === "production" ? { server } : { port: Number(env.PORT) + 1 });
 
     applyWSSHandler({
         app,
