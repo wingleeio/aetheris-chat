@@ -1,3 +1,4 @@
+import { ChannelBanner } from "@/components/channels/channel-banner";
 import { ChannelMessageInput } from "@/components/channels/channel-message-input";
 import { ChannelMessages } from "@/components/channels/channel-messages";
 import { DEFAULT_ID } from "@/constants";
@@ -20,7 +21,8 @@ export default async function Page({ params }: { params: { channel: string } }) 
     ]);
     return (
         <HydrationBoundary state={helpers.dehydrate()}>
-            <div className="flex flex-col h-full">
+            <ChannelBanner />
+            <div className="px-4 pb-4 flex flex-col flex-grow">
                 <ChannelMessages />
                 <ChannelMessageInput />
             </div>

@@ -23,7 +23,7 @@ export const Message = ({
     }
     return (
         <div className="text-muted-foreground text-sm flex gap-4">
-            <div className="w-10">
+            <div className="w-10 min-w-10">
                 <ProfileHoverCard profile={profile.data}>
                     <Avatar className={cn(bundled && "hidden", "cursor-pointer")}>
                         <AvatarImage src={profile.data.avatar_url ?? ""} />

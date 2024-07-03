@@ -35,8 +35,8 @@ export const ChannelsList = ({ id }: { id: string }) => {
                     key={channel.id}
                     href={`/community/${id}/channel/${channel.id}`}
                     className={cn(
-                        "flex gap-4 items-center text-muted-foreground cursor-pointer hover:bg-background transition-all px-4 py-2 rounded-sm group",
-                        channel.id === params.channel ? "bg-background" : ""
+                        "flex gap-4 items-center text-muted-foreground cursor-pointer hover:bg-background transition-all px-4 py-2 group",
+                        channel.id === params.channel ? "bg-background" : "",
                     )}
                 >
                     <FaHashtag /> {channel.name}

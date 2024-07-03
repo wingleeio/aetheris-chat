@@ -21,7 +21,7 @@ const MyProfileWithQuery = ({ id }: { id: string }) => {
     if (!profile.data) return null;
 
     return (
-        <div className="p-4 bg-background rounded-sm text-muted-foreground text-sm flex gap-2 shadow-sm">
+        <div className="p-4 bg-background text-muted-foreground text-sm flex gap-2 shadow-sm">
             <div>
                 <Avatar>
                     <AvatarImage src={profile.data.avatar_url ?? ""} />

@@ -24,7 +24,7 @@ export const CommunityBanner = ({ id }: { id: string }) => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
             }}
-            className="rounded-sm relative overflow-hidden mb-2"
+            className="relative overflow-hidden mb-2"
         >
             <div className="p-2 text-white h-28 flex flex-col z-10 relative">
                 <div className="flex-grow" />
@@ -34,7 +34,7 @@ export const CommunityBanner = ({ id }: { id: string }) => {
                     {data?.owner_id === session?.user?.id && (
                         <AddChannelDialog id={id}>
                             <button>
-                                <PlusIcon />
+                                <PlusIcon className="h-3 hover:text-indigo-300" />
                             </button>
                         </AddChannelDialog>
                     )}
@@ -49,7 +49,7 @@ export const CommunityBanner = ({ id }: { id: string }) => {
                             }}
                         >
                             <button>
-                                <EditIcon />
+                                <EditIcon className="h-3 hover:text-indigo-300" />
                             </button>
                         </EditCommunityDialog>
                     )}

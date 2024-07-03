@@ -12,8 +12,8 @@ export default function Layout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="flex h-full bg-muted">
-            <div className="flex flex-col p-2 ml-2 my-2 gap-2 bg-foreground/5 rounded-sm shadow-sm">
+        <div className="flex h-full bg-foreground/5">
+            <div className="flex flex-col p-2 ml-2 my-2 gap-2">
                 <Link
                     href="/"
                     className="w-12 h-12 rounded-sm text-muted-foreground text-2xl flex justify-center items-center hover:text-indigo-500"

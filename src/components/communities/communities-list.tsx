@@ -23,7 +23,7 @@ export const CommunitiesList = () => {
         <div
             className="grid grid-flow-row auto-cols-fr gap-2"
             style={{
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
             }}
         >
             {data.map((community) => (

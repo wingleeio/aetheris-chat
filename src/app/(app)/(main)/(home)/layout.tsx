@@ -1,7 +1,5 @@
-import { FaCompass, FaHome } from "react-icons/fa";
-
-import { MyProfile } from "@/components/profile/my-profile";
-import { Navigation } from "@/components/shared/navigation";
+import { HomeContainer } from "@/components/home/home-container";
+import { HomeSidebar } from "@/components/home/home-sidebar";
 
 export default function Layout({
     children,
@@ -9,29 +7,11 @@ export default function Layout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="h-full p-2 flex gap-2 bg-muted">
-            <div className="min-w-[300px] flex flex-col">
-                <div className="flex-grow text-sm flex flex-col gap-1">
-                    <Navigation
-                        baseClassName="flex gap-4 items-center text-muted-foreground cursor-pointer hover:bg-background transition-all px-4 py-2 rounded-sm"
-                        activeClassName="bg-background"
-                        items={[
-                            {
-                                icon: <FaHome />,
-                                name: "Home",
-                                href: "/",
-                            },
-                            {
-                                icon: <FaCompass />,
-                                name: "Discover",
-                                href: "/discover",
-                            },
-                        ]}
-                    />
-                </div>
-                <MyProfile />
+        <div className="h-full p-2">
+            <div className="flex h-full overflow-hidden bg-muted rounded-sm">
+                <HomeSidebar />
+                <HomeContainer>{children}</HomeContainer>
             </div>
-            <div className="p-4 bg-background rounded-sm shadow-sm flex-grow">{children}</div>
         </div>
     );
 }
