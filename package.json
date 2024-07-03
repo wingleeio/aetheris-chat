@@ -6,8 +6,9 @@
         "dev": "tsx watch ./src/index.ts",
         "build:server": "yarn tsc --project tsconfig.server.json && tsc-alias --project tsconfig.server.json",
         "build:next": "next build",
-        "build": "yarn build:server && yarn build:next",
-        "start": "NODE_ENV=production node ./dist/index.js",
+        "build:old": "yarn build:server && yarn build:next",
+        "build": "yarn build:next",
+        "start": "NODE_ENV=production tsx src/index.ts",
         "lint": "next lint",
         "database:generate": "npx @edgedb/generate queries --file"
     },

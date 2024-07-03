@@ -8,7 +8,7 @@ import { createHTTPHandler } from "@aetheris/server/adapters/http";
 import { applyWSSHandler } from "@aetheris/server/adapters/ws";
 import { createServer } from "http";
 import next from "next";
-import WebSocket from "ws";
+import { WebSocket } from "ws";
 
 const nextApp = next({
     dev: env.NODE_ENV !== "production",
@@ -33,7 +33,7 @@ nextApp.prepare().then(() => {
         return nextHandler(req, res);
     });
 
-    const wss = new WebSocket.Server({ port: 3001 });
+    const wss = new WebSocket.Server(env.NODE_ENV === "production" ? { server } : { port: env.PORT + 1 });
 
     applyWSSHandler({
         app,
@@ -42,12 +42,20 @@ nextApp.prepare().then(() => {
     });
 
     server.on("upgrade", (req, socket, head) => {
-        if (req.url?.startsWith("/aether")) {
+        if (req.url === "/aether") {
             wss.handleUpgrade(req, socket, head, (ws) => {
                 wss.emit("connection", ws, req);
             });
         }
     });
+
+    if (env.NODE_ENV === "production") {
+        const originalOn = server.on.bind(server);
+
+        server.on = function (event, listener) {
+            return event !== "upgrade" ? originalOn(event, listener) : server;
+        };
+    }
 
     server.listen(env.PORT, () => {
         logger.info(`Server listening on http://${env.HOSTNAME}:${env.PORT}`);

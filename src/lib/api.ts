@@ -24,7 +24,7 @@ const getWsLink = () => {
 export const api = createClient<App>({
     links: [
         loggerLink({
-            enabled: typeof window !== "undefined",
+            enabled: typeof window !== "undefined" && env.NODE_ENV === "development",
         }),
         matchLink({
             match: ({ method }) => {
