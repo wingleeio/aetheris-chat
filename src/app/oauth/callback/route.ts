@@ -16,7 +16,7 @@ export async function GET(req: Request) {
         return new Response(null, {
             status: 302,
             headers: {
-                Location: "/login?error=oauth_error",
+                Location: "/signIn?error=oauth_error",
             },
         });
     }
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
         return new Response(null, {
             status: 302,
             headers: {
-                Location: "/login?error=oauth_error",
+                Location: "/signIn?error=oauth_error",
             },
         });
     }
@@ -72,7 +72,7 @@ export async function GET(req: Request) {
         return new Response(null, {
             status: 302,
             headers: {
-                Location: "/login?error=oauth_error",
+                Location: "/signIn?error=oauth_error",
             },
         });
     }
