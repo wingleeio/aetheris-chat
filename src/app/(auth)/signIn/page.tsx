@@ -23,7 +23,7 @@ const schema = z.object({
     }),
     password: z
         .string()
-        .regex(new RegExp('(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*'), {
+        .regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]).*$/, {
             message: "Password must contain at least one uppercase letter and one special character",
         })
         .min(8, {

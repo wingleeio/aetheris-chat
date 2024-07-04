@@ -12,7 +12,7 @@ export const auth = {
     signIn: action.handler({
         input: z.object({
             email: z.string().email(),
-            password: z.string(),
+            password: z.string().regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]).*$/),
         }),
         resolve: async ({ input, database, service, cookies }) => {
             const user = await database.getUserWithHashedPassword({ email: input.email });
@@ -41,7 +41,7 @@ export const auth = {
     signUp: action.handler({
         input: z.object({
             email: z.string().email(),
-            password: z.string(),
+            password: z.string().regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]).*$/),
         }),
         resolve: async ({ input, database, service, cookies }) => {
             const hashedPassword = await hash(input.password, {

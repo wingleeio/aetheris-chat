@@ -23,7 +23,7 @@ const schema = z
             .min(8, {
                 message: "Password must be at least 8 characters long",
             })
-            .regex(new RegExp('(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*'), {
+            .regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]).*$/, {
                 message: "Password must contain at least one uppercase letter and one special character",
             }),
         confirmPassword: z.string().min(8, {
