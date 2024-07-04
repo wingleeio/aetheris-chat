@@ -24,9 +24,6 @@ export const ChannelMessageInput = () => {
     });
 
     const sendMessage = client.channels.sendMessageToChannel.useMutation({
-        onSuccess: () => {
-            form.reset();
-        },
         onError: (error) => {
             toast.error("Error sending message", {
                 description: error.message,
@@ -34,11 +31,13 @@ export const ChannelMessageInput = () => {
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof schema>) =>
+    const onSubmit = async (data: z.infer<typeof schema>) => {
+        form.reset();
         sendMessage.mutate({
             ...data,
             channel_id: params.channel,
         });
+    };
 
     return (
         <Form {...form}>
