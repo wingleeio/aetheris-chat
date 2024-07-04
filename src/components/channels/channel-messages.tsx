@@ -73,7 +73,7 @@ export const ChannelMessages = () => {
                                     const previousTime = new Date(page.messages[j - 1].created_at);
                                     const timeDifference = (currentTime.getTime() - previousTime.getTime()) / 1000;
 
-                                    if (timeDifference <= 15) {
+                                    if (timeDifference <= 30) {
                                         bundled = true;
                                     }
                                 }
