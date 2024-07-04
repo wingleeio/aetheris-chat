@@ -117,4 +117,14 @@ export const communities = {
             });
         },
     }),
+    leaveCommunity: userVerifiedAction.handler({
+        input: z.object({
+            id: z.string(),
+        }),
+        resolve: async ({ database, input }) => {
+            await database.leaveCommunity({
+                community_id: input.id,
+            });
+        },
+    }),
 };

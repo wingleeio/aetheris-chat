@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { FaUsers } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import { RiArrowRightLine } from "react-icons/ri";
-import { client } from "@/lib/client";
+import { client, useAetherisContext } from "@/lib/client";
 import { toast } from "sonner";
+import { helpers } from "@/lib/api";
 
 export const CommunityJoinCard = () => {
     const params = useParams<{ community: string }>();
+    const { queryClient } = useAetherisContext();
     const router = useRouter();
     const { data: community } = client.communities.getCommunity.useQuery({
         input: {
@@ -19,6 +21,9 @@ export const CommunityJoinCard = () => {
     });
     const joinCommunity = client.communities.joinCommunity.useMutation({
         onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: helpers.communities.getMyCommunities.getQueryKey(),
+            });
             router.push(`/community/${params.community}`);
         },
         onError: (error) => {

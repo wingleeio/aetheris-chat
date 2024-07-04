@@ -2,25 +2,14 @@
 
 import type {Executor} from "edgedb";
 
-export type CreateEmailVerificationArgs = {
-  readonly "user_id": string;
-  readonly "code": string;
-  readonly "expires_at": Date;
-};
 
-export type CreateEmailVerificationReturns = {
-  "code": string;
-};
+export type DeleteExpiredSessionsReturns = Array<{
+  "id": string;
+}>;
 
-export function createEmailVerification(client: Executor, args: CreateEmailVerificationArgs): Promise<CreateEmailVerificationReturns> {
-  return client.queryRequiredSingle(`\
-select (insert EmailVerificationCode {
-      user := <User><uuid>$user_id,
-      code := <str>$code,
-      expires_at := <datetime>$expires_at
-}) {
-  code,
-}`, args);
+export function deleteExpiredSessions(client: Executor): Promise<DeleteExpiredSessionsReturns> {
+  return client.query(`\
+delete Session filter .expires_at < datetime_current();`);
 
 }
 
@@ -40,37 +29,35 @@ delete Session filter .user = <User><uuid>$user_id;`, args);
 }
 
 
-export type DeleteEmailVerificationCodesArgs = {
-  readonly "user_id": string;
+export type DeleteSessionArgs = {
+  readonly "session_id": string;
 };
 
-export type DeleteEmailVerificationCodesReturns = {
+export type DeleteSessionReturns = {
   "id": string;
 } | null;
 
-export function deleteEmailVerificationCodes(client: Executor, args: DeleteEmailVerificationCodesArgs): Promise<DeleteEmailVerificationCodesReturns> {
+export function deleteSession(client: Executor, args: DeleteSessionArgs): Promise<DeleteSessionReturns> {
   return client.querySingle(`\
-delete EmailVerificationCode filter .user = <User><uuid>$user_id`, args);
+delete Session filter .session_id = <str>$session_id;`, args);
 
 }
 
 
-export type GetUserWithHashedPasswordArgs = {
-  readonly "email": string;
+export type GetOauthAccountArgs = {
+  readonly "provider_user_id": string;
 };
 
-export type GetUserWithHashedPasswordReturns = {
-  "id": string;
-  "hashed_password": string | null;
+export type GetOauthAccountReturns = {
+  "user_id": string;
 } | null;
 
-export function getUserWithHashedPassword(client: Executor, args: GetUserWithHashedPasswordArgs): Promise<GetUserWithHashedPasswordReturns> {
+export function getOauthAccount(client: Executor, args: GetOauthAccountArgs): Promise<GetOauthAccountReturns> {
   return client.querySingle(`\
-select User {
-  id,
-  hashed_password
+select OAuth2Account {
+  user_id := .user.id,
 }
-filter .email = <str>$email`, args);
+filter .provider_user_id = <str>$provider_user_id;`, args);
 
 }
 
@@ -121,20 +108,29 @@ select session {
 }
 
 
-export type GetOauthAccountArgs = {
-  readonly "provider_user_id": string;
+export type GetUserSessionsArgs = {
+  readonly "user_id": string;
 };
 
-export type GetOauthAccountReturns = {
-  "user_id": string;
-} | null;
+export type GetUserSessionsReturns = Array<{
+  "id": string;
+  "session_id": string;
+  "expires_at": Date;
+  "user": {
+    "id": string;
+  };
+}>;
 
-export function getOauthAccount(client: Executor, args: GetOauthAccountArgs): Promise<GetOauthAccountReturns> {
-  return client.querySingle(`\
-select OAuth2Account {
-  user_id := .user.id,
-}
-filter .provider_user_id = <str>$provider_user_id;`, args);
+export function getUserSessions(client: Executor, args: GetUserSessionsArgs): Promise<GetUserSessionsReturns> {
+  return client.query(`\
+select Session {
+  id,
+  session_id,
+  expires_at,
+  user: {
+    id
+  }
+} filter .user = <User><uuid>$user_id;`, args);
 
 }
 
@@ -160,22 +156,6 @@ insert Session {
 }
 
 
-export type VerifyEmailArgs = {
-  readonly "code": string;
-};
-
-export type VerifyEmailReturns = boolean | null;
-
-export function verifyEmail(client: Executor, args: VerifyEmailArgs): Promise<VerifyEmailReturns> {
-  return client.querySingle(`\
-with
-  email_verification_code := (select EmailVerificationCode filter .user = <User><uuid>global current_user_id),
-  expired := email_verification_code.expires_at < datetime_current()
-select email_verification_code.code = <str>$code and not expired;`, args);
-
-}
-
-
 export type UpdateSessionExpirationArgs = {
   readonly "expires_at": Date;
   readonly "session_id": string;
@@ -196,50 +176,38 @@ set {
 }
 
 
-export type CreateChannelArgs = {
-  readonly "name": string;
-  readonly "community_id": string;
+export type GetUserWithHashedPasswordArgs = {
+  readonly "email": string;
 };
 
-export type CreateChannelReturns = {
+export type GetUserWithHashedPasswordReturns = {
   "id": string;
-};
+  "hashed_password": string | null;
+} | null;
 
-export function createChannel(client: Executor, args: CreateChannelArgs): Promise<CreateChannelReturns> {
-  return client.queryRequiredSingle(`\
-select (insert Channel {
-  name := <str>$name,
-  community := <Community><uuid>$community_id,
-}) {
-  id
-}`, args);
+export function getUserWithHashedPassword(client: Executor, args: GetUserWithHashedPasswordArgs): Promise<GetUserWithHashedPasswordReturns> {
+  return client.querySingle(`\
+select User {
+  id,
+  hashed_password
+}
+filter .email = <str>$email`, args);
 
 }
 
 
-export type GetUserSessionsArgs = {
-  readonly "user_id": string;
+export type VerifyEmailArgs = {
+  readonly "code": string;
 };
 
-export type GetUserSessionsReturns = Array<{
-  "id": string;
-  "session_id": string;
-  "expires_at": Date;
-  "user": {
-    "id": string;
-  };
-}>;
+export type VerifyEmailReturns = boolean | null;
 
-export function getUserSessions(client: Executor, args: GetUserSessionsArgs): Promise<GetUserSessionsReturns> {
-  return client.query(`\
-select Session {
-  id,
-  session_id,
-  expires_at,
-  user: {
-    id
-  }
-} filter .user = <User><uuid>$user_id;`, args);
+export function verifyEmail(client: Executor, args: VerifyEmailArgs): Promise<VerifyEmailReturns> {
+  return client.querySingle(`\
+with
+  email_verification_code := (select EmailVerificationCode filter .user = <User><uuid>global current_user_id),
+  expired := email_verification_code.expires_at < datetime_current()
+select email_verification_code.code = <str>$code and not expired;`, args);
 
 }
 
@@ -298,6 +266,186 @@ select (insert Community {
 }
 
 
+export type DeleteEmailVerificationCodesArgs = {
+  readonly "user_id": string;
+};
+
+export type DeleteEmailVerificationCodesReturns = {
+  "id": string;
+} | null;
+
+export function deleteEmailVerificationCodes(client: Executor, args: DeleteEmailVerificationCodesArgs): Promise<DeleteEmailVerificationCodesReturns> {
+  return client.querySingle(`\
+delete EmailVerificationCode filter .user = <User><uuid>$user_id`, args);
+
+}
+
+
+export type CreateOauthAccountArgs = {
+  readonly "provider": string;
+  readonly "provider_user_id": string;
+  readonly "user_id": string;
+};
+
+export type CreateOauthAccountReturns = {
+  "id": string;
+};
+
+export function createOauthAccount(client: Executor, args: CreateOauthAccountArgs): Promise<CreateOauthAccountReturns> {
+  return client.queryRequiredSingle(`\
+insert OAuth2Account {
+  provider := <str>$provider,
+  provider_user_id := <str>$provider_user_id,
+  user := <User><uuid>$user_id,
+}`, args);
+
+}
+
+
+
+export type GetCommunitiesReturns = Array<{
+  "id": string;
+  "name": string;
+  "about": string;
+  "icon_url": string | null;
+  "cover_url": string | null;
+  "is_member": boolean;
+  "member_count": number;
+  "messages_since_yesterday": number;
+}>;
+
+export function getCommunities(client: Executor): Promise<GetCommunitiesReturns> {
+  return client.query(`\
+select Community {
+    id,
+    name,
+    about,
+    icon_url,
+    cover_url,
+    is_member := count(.members filter .id = global current_user_id) > 0,
+    member_count := count(.members),
+    messages_since_yesterday := count(.channels.messages filter .created_at > datetime_current() - <cal::date_duration>'1 day')
+}
+order by .member_count desc`);
+
+}
+
+
+export type CreateEmailVerificationArgs = {
+  readonly "user_id": string;
+  readonly "code": string;
+  readonly "expires_at": Date;
+};
+
+export type CreateEmailVerificationReturns = {
+  "code": string;
+};
+
+export function createEmailVerification(client: Executor, args: CreateEmailVerificationArgs): Promise<CreateEmailVerificationReturns> {
+  return client.queryRequiredSingle(`\
+select (insert EmailVerificationCode {
+      user := <User><uuid>$user_id,
+      code := <str>$code,
+      expires_at := <datetime>$expires_at
+}) {
+  code,
+}`, args);
+
+}
+
+
+export type CreateUserArgs = {
+  readonly "email": string;
+  readonly "hashed_password"?: string | null;
+  readonly "email_verified": boolean;
+};
+
+export type CreateUserReturns = {
+  "id": string;
+};
+
+export function createUser(client: Executor, args: CreateUserArgs): Promise<CreateUserReturns> {
+  return client.queryRequiredSingle(`\
+insert User {
+  email := <str>$email,
+  hashed_password := <optional str>$hashed_password,
+  email_verified := <bool>$email_verified,
+}`, args);
+
+}
+
+
+export type GetChannelsArgs = {
+  readonly "community_id": string;
+};
+
+export type GetChannelsReturns = Array<{
+  "id": string;
+  "name": string;
+  "owner_id": string;
+}>;
+
+export function getChannels(client: Executor, args: GetChannelsArgs): Promise<GetChannelsReturns> {
+  return client.query(`\
+select Channel {
+  id,
+  name,
+  owner_id := .community.owner.id,
+}
+filter .community.id = <uuid>$community_id`, args);
+
+}
+
+
+
+export type GetMyCommunitiesReturns = Array<{
+  "id": string;
+  "name": string;
+  "about": string;
+  "icon_url": string | null;
+  "cover_url": string | null;
+  "member_count": number;
+  "messages_since_yesterday": number;
+}>;
+
+export function getMyCommunities(client: Executor): Promise<GetMyCommunitiesReturns> {
+  return client.query(`\
+select Community {
+    id,
+    name,
+    about,
+    icon_url,
+    cover_url,
+    member_count := count(.members),
+    messages_since_yesterday := count(.messages filter .created_at > datetime_current() - <cal::date_duration>'1 day')
+}
+filter .members = <User>global current_user_id
+order by .created_at desc`);
+
+}
+
+
+export type CreateChannelArgs = {
+  readonly "name": string;
+  readonly "community_id": string;
+};
+
+export type CreateChannelReturns = {
+  "id": string;
+};
+
+export function createChannel(client: Executor, args: CreateChannelArgs): Promise<CreateChannelReturns> {
+  return client.queryRequiredSingle(`\
+select (insert Channel {
+  name := <str>$name,
+  community := <Community><uuid>$community_id,
+}) {
+  id
+}`, args);
+
+}
+
+
 export type DeleteChannelMessagesArgs = {
   readonly "channel_id": string;
 };
@@ -350,24 +498,18 @@ filter .id = <uuid>$channel_id`, args);
 }
 
 
-export type GetChannelsArgs = {
-  readonly "community_id": string;
+export type IsChannelMemberArgs = {
+  readonly "channel_id": string;
 };
 
-export type GetChannelsReturns = Array<{
-  "id": string;
-  "name": string;
-  "owner_id": string;
-}>;
+export type IsChannelMemberReturns = boolean;
 
-export function getChannels(client: Executor, args: GetChannelsArgs): Promise<GetChannelsReturns> {
-  return client.query(`\
-select Channel {
-  id,
-  name,
-  owner_id := .community.owner.id,
-}
-filter .community.id = <uuid>$community_id`, args);
+export function isChannelMember(client: Executor, args: IsChannelMemberArgs): Promise<IsChannelMemberReturns> {
+  return client.queryRequiredSingle(`\
+with 
+  channel := (select Channel filter .id = <uuid>$channel_id),
+  is_member := count(channel.community.members filter .id = global current_user_id) > 0,
+select is_member`, args);
 
 }
 
@@ -402,63 +544,6 @@ filter .id = <uuid>$community_id`, args);
 }
 
 
-
-export type GetMyCommunitiesReturns = Array<{
-  "id": string;
-  "name": string;
-  "about": string;
-  "icon_url": string | null;
-  "cover_url": string | null;
-  "member_count": number;
-  "messages_since_yesterday": number;
-}>;
-
-export function getMyCommunities(client: Executor): Promise<GetMyCommunitiesReturns> {
-  return client.query(`\
-select Community {
-    id,
-    name,
-    about,
-    icon_url,
-    cover_url,
-    member_count := count(.members),
-    messages_since_yesterday := count(.messages filter .created_at > datetime_current() - <cal::date_duration>'1 day')
-}
-filter .members = <User>global current_user_id
-order by .created_at desc`);
-
-}
-
-
-
-export type GetCommunitiesReturns = Array<{
-  "id": string;
-  "name": string;
-  "about": string;
-  "icon_url": string | null;
-  "cover_url": string | null;
-  "is_member": boolean;
-  "member_count": number;
-  "messages_since_yesterday": number;
-}>;
-
-export function getCommunities(client: Executor): Promise<GetCommunitiesReturns> {
-  return client.query(`\
-select Community {
-    id,
-    name,
-    about,
-    icon_url,
-    cover_url,
-    is_member := count(.members filter .id = global current_user_id) > 0,
-    member_count := count(.members),
-    messages_since_yesterday := count(.channels.messages filter .created_at > datetime_current() - <cal::date_duration>'1 day')
-}
-order by .member_count desc`);
-
-}
-
-
 export type IsAllowedToDeleteChannelArgs = {
   readonly "channel_id": string;
 };
@@ -475,79 +560,20 @@ select is_allowed`, args);
 }
 
 
-export type IsAllowedToUpdateCommunityArgs = {
+export type JoinCommunityArgs = {
   readonly "community_id": string;
 };
 
-export type IsAllowedToUpdateCommunityReturns = boolean | null;
-
-export function isAllowedToUpdateCommunity(client: Executor, args: IsAllowedToUpdateCommunityArgs): Promise<IsAllowedToUpdateCommunityReturns> {
-  return client.querySingle(`\
-with 
-  community := (select Community filter .id = <uuid>$community_id),
-  is_allowed := community.owner.id = global current_user_id,
-select is_allowed`, args);
-
-}
-
-
-export type IsChannelMemberArgs = {
-  readonly "channel_id": string;
-};
-
-export type IsChannelMemberReturns = boolean;
-
-export function isChannelMember(client: Executor, args: IsChannelMemberArgs): Promise<IsChannelMemberReturns> {
-  return client.queryRequiredSingle(`\
-with 
-  channel := (select Channel filter .id = <uuid>$channel_id),
-  is_member := count(channel.community.members filter .id = global current_user_id) > 0,
-select is_member`, args);
-
-}
-
-
-export type IsCommunityMemberArgs = {
-  readonly "community_id": string;
-};
-
-export type IsCommunityMemberReturns = boolean;
-
-export function isCommunityMember(client: Executor, args: IsCommunityMemberArgs): Promise<IsCommunityMemberReturns> {
-  return client.queryRequiredSingle(`\
-with 
-  community := (select Community filter .id = <uuid>$community_id),
-  is_member := count(community.members filter .id = global current_user_id) > 0,
-select is_member`, args);
-
-}
-
-
-export type UpdateCommunityArgs = {
-  readonly "name": string;
-  readonly "about": string;
-  readonly "icon_url"?: string | null;
-  readonly "cover_url"?: string | null;
-  readonly "community_id": string;
-};
-
-export type UpdateCommunityReturns = {
+export type JoinCommunityReturns = {
   "id": string;
 } | null;
 
-export function updateCommunity(client: Executor, args: UpdateCommunityArgs): Promise<UpdateCommunityReturns> {
+export function joinCommunity(client: Executor, args: JoinCommunityArgs): Promise<JoinCommunityReturns> {
   return client.querySingle(`\
-select (
-    update Community
-    filter .id = <uuid>$community_id
-    set {
-        name := <str>$name,
-        about := <str>$about,
-        icon_url := <optional str>$icon_url ?? .icon_url,
-        cover_url := <optional str>$cover_url ?? .cover_url,
-    }
-) {
-    id
+update Community
+filter .id = <uuid>$community_id
+set {
+    members += <User>global current_user_id
 }`, args);
 
 }
@@ -599,20 +625,82 @@ select {
 }
 
 
-export type JoinCommunityArgs = {
+export type IsCommunityMemberArgs = {
   readonly "community_id": string;
 };
 
-export type JoinCommunityReturns = {
+export type IsCommunityMemberReturns = boolean;
+
+export function isCommunityMember(client: Executor, args: IsCommunityMemberArgs): Promise<IsCommunityMemberReturns> {
+  return client.queryRequiredSingle(`\
+with 
+  community := (select Community filter .id = <uuid>$community_id),
+  is_member := count(community.members filter .id = global current_user_id) > 0,
+select is_member`, args);
+
+}
+
+
+export type IsAllowedToUpdateCommunityArgs = {
+  readonly "community_id": string;
+};
+
+export type IsAllowedToUpdateCommunityReturns = boolean | null;
+
+export function isAllowedToUpdateCommunity(client: Executor, args: IsAllowedToUpdateCommunityArgs): Promise<IsAllowedToUpdateCommunityReturns> {
+  return client.querySingle(`\
+with 
+  community := (select Community filter .id = <uuid>$community_id),
+  is_allowed := community.owner.id = global current_user_id,
+select is_allowed`, args);
+
+}
+
+
+export type LeaveCommunityArgs = {
+  readonly "community_id": string;
+};
+
+export type LeaveCommunityReturns = {
   "id": string;
 } | null;
 
-export function joinCommunity(client: Executor, args: JoinCommunityArgs): Promise<JoinCommunityReturns> {
+export function leaveCommunity(client: Executor, args: LeaveCommunityArgs): Promise<LeaveCommunityReturns> {
   return client.querySingle(`\
 update Community
 filter .id = <uuid>$community_id
 set {
-    members += <User>global current_user_id
+    members -= <User>global current_user_id
+}`, args);
+
+}
+
+
+export type UpdateCommunityArgs = {
+  readonly "name": string;
+  readonly "about": string;
+  readonly "icon_url"?: string | null;
+  readonly "cover_url"?: string | null;
+  readonly "community_id": string;
+};
+
+export type UpdateCommunityReturns = {
+  "id": string;
+} | null;
+
+export function updateCommunity(client: Executor, args: UpdateCommunityArgs): Promise<UpdateCommunityReturns> {
+  return client.querySingle(`\
+select (
+    update Community
+    filter .id = <uuid>$community_id
+    set {
+        name := <str>$name,
+        about := <str>$about,
+        icon_url := <optional str>$icon_url ?? .icon_url,
+        cover_url := <optional str>$cover_url ?? .cover_url,
+    }
+) {
+    id
 }`, args);
 
 }
@@ -643,33 +731,6 @@ select (insert Message {
     created_at,
     updated_at,
     sender_id := .sender.id,
-}`, args);
-
-}
-
-
-export type UpdateProfileArgs = {
-  readonly "display_name"?: string | null;
-  readonly "tag"?: string | null;
-  readonly "bio"?: string | null;
-  readonly "avatar_url"?: string | null;
-  readonly "cover_url"?: string | null;
-};
-
-export type UpdateProfileReturns = {
-  "id": string;
-} | null;
-
-export function updateProfile(client: Executor, args: UpdateProfileArgs): Promise<UpdateProfileReturns> {
-  return client.querySingle(`\
-update Profile
-filter .user.id = global current_user_id
-set {
-    display_name := <optional str>$display_name ?? .display_name,
-    tag := <optional str>$tag ?? .tag,
-    bio := <optional str>$bio ?? .bio,
-    avatar_url := <optional str>$avatar_url ?? .avatar_url,
-    cover_url := <optional str>$cover_url ?? .cover_url,
 }`, args);
 
 }
@@ -729,70 +790,28 @@ filter .user.id = <uuid>$user_id`, args);
 }
 
 
-
-export type DeleteExpiredSessionsReturns = Array<{
-  "id": string;
-}>;
-
-export function deleteExpiredSessions(client: Executor): Promise<DeleteExpiredSessionsReturns> {
-  return client.query(`\
-delete Session filter .expires_at < datetime_current();`);
-
-}
-
-
-export type CreateOauthAccountArgs = {
-  readonly "provider": string;
-  readonly "provider_user_id": string;
-  readonly "user_id": string;
+export type UpdateProfileArgs = {
+  readonly "display_name"?: string | null;
+  readonly "tag"?: string | null;
+  readonly "bio"?: string | null;
+  readonly "avatar_url"?: string | null;
+  readonly "cover_url"?: string | null;
 };
 
-export type CreateOauthAccountReturns = {
-  "id": string;
-};
-
-export function createOauthAccount(client: Executor, args: CreateOauthAccountArgs): Promise<CreateOauthAccountReturns> {
-  return client.queryRequiredSingle(`\
-insert OAuth2Account {
-  provider := <str>$provider,
-  provider_user_id := <str>$provider_user_id,
-  user := <User><uuid>$user_id,
-}`, args);
-
-}
-
-
-export type CreateUserArgs = {
-  readonly "email": string;
-  readonly "hashed_password"?: string | null;
-  readonly "email_verified": boolean;
-};
-
-export type CreateUserReturns = {
-  "id": string;
-};
-
-export function createUser(client: Executor, args: CreateUserArgs): Promise<CreateUserReturns> {
-  return client.queryRequiredSingle(`\
-insert User {
-  email := <str>$email,
-  hashed_password := <optional str>$hashed_password,
-  email_verified := <bool>$email_verified,
-}`, args);
-
-}
-
-
-export type DeleteSessionArgs = {
-  readonly "session_id": string;
-};
-
-export type DeleteSessionReturns = {
+export type UpdateProfileReturns = {
   "id": string;
 } | null;
 
-export function deleteSession(client: Executor, args: DeleteSessionArgs): Promise<DeleteSessionReturns> {
+export function updateProfile(client: Executor, args: UpdateProfileArgs): Promise<UpdateProfileReturns> {
   return client.querySingle(`\
-delete Session filter .session_id = <str>$session_id;`, args);
+update Profile
+filter .user.id = global current_user_id
+set {
+    display_name := <optional str>$display_name ?? .display_name,
+    tag := <optional str>$tag ?? .tag,
+    bio := <optional str>$bio ?? .bio,
+    avatar_url := <optional str>$avatar_url ?? .avatar_url,
+    cover_url := <optional str>$cover_url ?? .cover_url,
+}`, args);
 
 }

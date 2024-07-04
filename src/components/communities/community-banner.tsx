@@ -1,17 +1,31 @@
 "use client";
 
-import { EditIcon, PlusIcon } from "lucide-react";
+import { EditIcon, LogOut, PlusIcon } from "lucide-react";
 
 import { AddChannelDialog } from "@/components/channels/add-channel-dialog";
 import { EditCommunityDialog } from "@/components/communities/edit-community-dialog";
-import { client } from "@/lib/client";
+import { client, useAetherisContext } from "@/lib/client";
 import { useAuth } from "@/hooks/use-auth";
+import { ConfirmDialog } from "../shared/confirm-dialog";
+import { helpers } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export const CommunityBanner = ({ id }: { id: string }) => {
     const session = useAuth();
+    const router = useRouter();
+    const { queryClient } = useAetherisContext();
     const { data } = client.communities.getCommunity.useQuery({
         input: {
             id,
+        },
+    });
+
+    const leaveChannel = client.communities.leaveCommunity.useMutation({
+        onSuccess: () => {
+            router.replace("/");
+            queryClient.invalidateQueries({
+                queryKey: helpers.communities.getMyCommunities.getQueryKey(),
+            });
         },
     });
 
@@ -52,6 +66,21 @@ export const CommunityBanner = ({ id }: { id: string }) => {
                                 <EditIcon className="h-3 hover:text-indigo-300" />
                             </button>
                         </EditCommunityDialog>
+                    )}
+                    {data?.owner_id !== session?.user?.id && (
+                        <ConfirmDialog
+                            title="Leave community"
+                            description="Are you sure you want to leave this community?"
+                            onConfirm={() => {
+                                leaveChannel.mutate({
+                                    id,
+                                });
+                            }}
+                        >
+                            <button>
+                                <LogOut className="h-3 hover:text-indigo-300" />
+                            </button>
+                        </ConfirmDialog>
                     )}
                 </div>
             </div>
