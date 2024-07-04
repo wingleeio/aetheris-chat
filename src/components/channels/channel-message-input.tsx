@@ -16,6 +16,11 @@ type Schema = z.infer<typeof schema>;
 
 export const ChannelMessageInput = () => {
     const params = useParams<{ channel: string }>();
+    const channel = client.channels.getChannel.useQuery({
+        input: {
+            channel_id: params.channel,
+        },
+    });
     const form = useForm<Schema>({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -49,7 +54,7 @@ export const ChannelMessageInput = () => {
                         <div>
                             <input
                                 className="w-full p-4 outline-none focus:outline-none text-muted-foreground bg-muted rounded-sm"
-                                placeholder="Enter your message here..."
+                                placeholder={`Message #${channel.data?.name}`}
                                 {...field}
                             />
                         </div>
