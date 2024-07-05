@@ -3,6 +3,7 @@ import { userRequiredAction, userVerifiedAction } from "@/server/aether";
 
 import { ApiError } from "@/server/error";
 import { z } from "zod";
+import sharp from "sharp";
 
 export const communities = {
     createCommunity: userVerifiedAction.handler({
@@ -153,6 +154,71 @@ export const communities = {
             return () => {
                 events.off("unreadCommunity", onMessage);
             };
+        },
+    }),
+    addEmoji: userVerifiedAction.handler({
+        input: z.object({
+            community_id: z.string(),
+            emoji: z.string(),
+            code: z.string(),
+        }),
+        resolve: async ({ database, input, files }) => {
+            await database.transaction(async (tx) => {
+                const isAllowed = await tx.isAllowedToUpdateCommunity({
+                    community_id: input.community_id,
+                });
+
+                if (!isAllowed) {
+                    throw new ApiError(404, "User is not allowed to update this community.");
+                }
+
+                const codeExists = await tx.doesEmojiCodeAlreadyExist({
+                    community_id: input.community_id,
+                    code: input.code,
+                });
+
+                if (codeExists) {
+                    throw new ApiError(422, "Emoji with this code already exists in this community.");
+                }
+
+                const emoji_url = await files.upload("emoji", input.emoji, (buffer) => {
+                    return sharp(buffer).resize(120, 120).png().toBuffer();
+                });
+
+                await tx.addEmoji({
+                    community_id: input.community_id,
+                    code: input.code,
+                    emoji_url,
+                });
+            });
+        },
+    }),
+    deleteEmoji: userVerifiedAction.handler({
+        input: z.object({
+            emoji_id: z.string(),
+        }),
+        resolve: async ({ database, input }) => {
+            await database.transaction(async (tx) => {
+                const emoji = await tx.getEmoji({
+                    emoji_id: input.emoji_id,
+                });
+
+                if (!emoji) {
+                    throw new ApiError(404, "Emoji not found.");
+                }
+
+                const isAllowed = await tx.isAllowedToUpdateCommunity({
+                    community_id: emoji.community.id,
+                });
+
+                if (!isAllowed) {
+                    throw new ApiError(404, "User is not allowed to update this community.");
+                }
+
+                await tx.deleteEmoji({
+                    emoji_id: input.emoji_id,
+                });
+            });
         },
     }),
 };

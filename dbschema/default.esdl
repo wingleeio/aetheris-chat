@@ -77,6 +77,7 @@ module default {
         multi channels := .<community[is Channel];
         multi messages := .<community[is Message];
         multi roles := .<community[is CommunityRole];
+        multi emojis := .<community[is Emoji];
         icon_url: str;
         cover_url: str;
         required about: str;
@@ -120,6 +121,13 @@ module default {
         multi read_status := .<channel[is LastReadChannel];
     }
 
+    type Emoji extending Base {
+        required community: Community;
+        required code: str;
+        required emoji_url: str;
+        constraint exclusive on ((.community, .code));
+    }
+
     type Message extending Base {
         required sender: User {
             on target delete delete source;
@@ -127,6 +135,20 @@ module default {
         required content: str;
         community: Community;
         channel: Channel;
+        multi reactions := .<message[is MessageReact];
+    }
+
+    type MessageReact extending Base {
+        required message: Message {
+            on target delete delete source;
+        };
+        required user: User {
+            on target delete delete source;
+        };
+        required emoji: Emoji {
+            on target delete delete source;
+        };
+        constraint exclusive on ((.message, .user, .emoji));
     }
 
     type LastReadChannel extending Base {

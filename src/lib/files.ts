@@ -5,10 +5,15 @@ import { fileTypeFromBuffer } from "file-type";
 import { v4 } from "uuid";
 
 export const files = {
-    upload: async (prefix: string, file: string) => {
+    upload: async (prefix: string, file: string, preprocess?: (buffer: Buffer) => Promise<Buffer>) => {
         const key = `${prefix}-${v4()}`;
         const base64Data = file.split(",")[1] || file;
-        const decoded = Buffer.from(base64Data, "base64");
+        let decoded = Buffer.from(base64Data, "base64");
+
+        if (preprocess) {
+            decoded = await preprocess(decoded);
+        }
+
         const fileTypeResult = await fileTypeFromBuffer(decoded);
         const contentType = fileTypeResult?.mime ?? "application/octet-stream";
         const upload = new PutObjectCommand({

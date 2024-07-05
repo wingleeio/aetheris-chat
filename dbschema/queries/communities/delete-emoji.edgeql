@@ -1,0 +1,1 @@
+delete Emoji filter .id = <uuid>$emoji_id
