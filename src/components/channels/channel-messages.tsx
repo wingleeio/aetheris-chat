@@ -1,14 +1,16 @@
 "use client";
 import { Message } from "@/components/shared/message";
 import { DEFAULT_ID } from "@/constants";
+import { api, helpers } from "@/lib/api";
 import { client, useAetherisContext } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
 import { InView } from "react-intersection-observer";
 
 export const ChannelMessages = () => {
     const { queryClient } = useAetherisContext();
-    const params = useParams<{ channel: string }>();
+    const params = useParams<{ channel: string; community: string }>();
     const channel = client.channels.getChannel.useQuery({
         input: {
             channel_id: params.channel,
@@ -37,6 +39,48 @@ export const ChannelMessages = () => {
             });
         },
     });
+
+    useEffect(() => {
+        const queryKeyChannels = helpers.channels.getChannels.getQueryKey({ community_id: params.community });
+        const queryKeyCommunity = helpers.communities.getMyCommunities.getQueryKey();
+
+        queryClient.setQueryData(queryKeyChannels, (data: Awaited<ReturnType<typeof api.channels.getChannels>>) => {
+            return data
+                ? data.map((channel) => {
+                      if (channel.id === params.channel) {
+                          return {
+                              ...channel,
+                              unread_count: 0,
+                          };
+                      }
+                      return channel;
+                  })
+                : data;
+        });
+
+        const channels: Awaited<ReturnType<typeof api.channels.getChannels>> | undefined =
+            queryClient.getQueryData(queryKeyChannels);
+        const leftUnread = channels?.some((channel) => channel.unread_count > 0);
+
+        if (!leftUnread) {
+            queryClient.setQueryData(
+                queryKeyCommunity,
+                (data: Awaited<ReturnType<typeof api.communities.getMyCommunities>>) => {
+                    return data
+                        ? data.map((community) => {
+                              if (community.id === params.community) {
+                                  return {
+                                      ...community,
+                                      has_unread: false,
+                                  };
+                              }
+                              return community;
+                          })
+                        : data;
+                }
+            );
+        }
+    }, []);
 
     return (
         <div className="flex-grow relative">

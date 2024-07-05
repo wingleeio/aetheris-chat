@@ -1,3 +1,4 @@
+import { Events } from "@/lib/events";
 import { userRequiredAction, userVerifiedAction } from "@/server/aether";
 
 import { ApiError } from "@/server/error";
@@ -125,6 +126,33 @@ export const communities = {
             await database.leaveCommunity({
                 community_id: input.id,
             });
+        },
+    }),
+    listenForUnreadCommunities: userVerifiedAction.subscription({
+        output: z.object({
+            community_id: z.string(),
+            channel_id: z.string(),
+        }),
+        resolve: async ({ database, emit, events, user }) => {
+            const onMessage: Events["unreadCommunity"] = async (community, channel, sender) => {
+                if (user.id === sender) return;
+                const isCommunityMember = await database.isCommunityMember({
+                    community_id: community,
+                });
+
+                if (isCommunityMember) {
+                    emit({
+                        community_id: community,
+                        channel_id: channel,
+                    });
+                }
+            };
+
+            events.on("unreadCommunity", onMessage);
+
+            return () => {
+                events.off("unreadCommunity", onMessage);
+            };
         },
     }),
 };

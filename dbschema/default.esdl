@@ -1,6 +1,6 @@
 module default {
     global current_user_id: uuid;
-    
+
     abstract type Base {
         required created_at: datetime {
             default := datetime_current();
@@ -74,6 +74,17 @@ module default {
         required about: str;
         required name: str;
         required owner: User;
+
+        index fts::index on ((
+            fts::with_options(
+                .name,
+                language := fts::Language.eng
+            ),
+            fts::with_options(
+                .about,
+                language := fts::Language.eng
+            )
+        ));
     }
 
     scalar type CommunityPermission extending enum<
@@ -98,6 +109,7 @@ module default {
         required community: Community;
         multi messages := .<channel[is Message];
         multi allowed_roles: CommunityRole;
+        multi read_status := .<channel[is LastReadChannel];
     }
 
     type Message extending Base {
@@ -105,5 +117,14 @@ module default {
         required content: str;
         community: Community;
         channel: Channel;
+    }
+
+    type LastReadChannel extending Base {
+        required user: User;
+        required channel: Channel;
+        required last_read_at: datetime {
+            default := datetime_current();
+        };
+        constraint exclusive on ((.user, .channel));
     }
 }

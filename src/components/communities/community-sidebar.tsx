@@ -8,11 +8,12 @@ import { useParams } from "next/navigation";
 
 export const CommunitySidebar = () => {
     const params = useParams<{ community: string; channel: string }>();
+
     return (
         <div
             className={cn(
                 "min-w-full sm:min-w-[300px] flex flex-col overflow-hidden transition-all",
-                params.channel && "min-w-[0px] w-0 md:min-w-[300px] md:w-auto",
+                params.channel && "min-w-[0px] w-0 md:min-w-[300px] md:w-auto"
             )}
         >
             <div className="flex-grow text-sm flex flex-col">

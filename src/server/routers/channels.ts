@@ -68,6 +68,10 @@ export const channels = {
                     throw new ApiError(403, "You must be a member of the community to view this channel.");
                 }
 
+                await tx.markAsRead({
+                    channel_id: input.channel_id,
+                });
+
                 return tx.getMessagesByChannel({
                     cursor: input.cursor,
                     channel_id: input.channel_id,
@@ -85,8 +89,8 @@ export const channels = {
             channel_id: z.string(),
             content: z.string(),
         }),
-        resolve: async ({ database, input, events }) => {
-            const message = await database.transaction(async (tx) => {
+        resolve: async ({ database, input, events, user }) => {
+            const results = await database.transaction(async (tx) => {
                 const isChannelMember = await tx.isChannelMember({
                     channel_id: input.channel_id,
                 });
@@ -95,13 +99,23 @@ export const channels = {
                     throw new ApiError(403, "You must be a member of the community to send messages to this channel.");
                 }
 
-                return tx.sendChannelMessage({
+                const message = await tx.sendChannelMessage({
                     channel_id: input.channel_id,
                     content: input.content,
                 });
+
+                const community = await tx.getCommunityFromChannel({
+                    channel_id: input.channel_id,
+                });
+
+                return { message, community };
             });
-            events.emit("message", input.channel_id, message);
-            return message;
+
+            events.emit("message", input.channel_id, results.message);
+            events.emit("unreadCommunityChannel", results.community!.id, input.channel_id, user.id);
+            events.emit("unreadCommunity", results.community!.id, input.channel_id, user.id);
+
+            return results.message;
         },
     }),
     listenToChannelMessages: userVerifiedAction.subscription({
@@ -124,8 +138,13 @@ export const channels = {
                 throw new ApiError(403, "You must be a member of the community to listen to this channel.");
             }
 
-            const onMessage: Events["message"] = (channel, message) => {
+            const onMessage: Events["message"] = async (channel, message) => {
                 if (channel === input.channel_id) {
+                    await database
+                        .markAsRead({
+                            channel_id: input.channel_id,
+                        })
+                        .catch();
                     emit(message);
                 }
             };
@@ -134,6 +153,33 @@ export const channels = {
 
             return () => {
                 events.off("message", onMessage);
+            };
+        },
+    }),
+    listenForUnreadChannelMessages: userVerifiedAction.subscription({
+        input: z.object({
+            community_id: z.string(),
+        }),
+        output: z.string(),
+        resolve: async ({ database, input, emit, events, user }) => {
+            const isCommunityMember = await database.isCommunityMember({
+                community_id: input.community_id,
+            });
+
+            if (!isCommunityMember) {
+                throw new ApiError(403, "You must be a member of the community to listen to this channel.");
+            }
+
+            const onMessage: Events["unreadCommunityChannel"] = (community, channel, sender) => {
+                if (community === input.community_id && sender !== user.id) {
+                    emit(channel);
+                }
+            };
+
+            events.on("unreadCommunityChannel", onMessage);
+
+            return () => {
+                events.off("unreadCommunityChannel", onMessage);
             };
         },
     }),

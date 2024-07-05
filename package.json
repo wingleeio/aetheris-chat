@@ -13,9 +13,9 @@
         "database:generate": "npx @edgedb/generate queries --file"
     },
     "dependencies": {
-        "@aetheris/client": "^0.0.26",
-        "@aetheris/react-query": "^0.0.26",
-        "@aetheris/server": "^0.0.26",
+        "@aetheris/client": "^0.0.31",
+        "@aetheris/react-query": "^0.0.31",
+        "@aetheris/server": "^0.0.31",
         "@aws-sdk/client-s3": "^3.600.0",
         "@hookform/resolvers": "^3.6.0",
         "@node-rs/argon2": "^1.8.3",
