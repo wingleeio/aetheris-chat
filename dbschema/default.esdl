@@ -33,13 +33,13 @@ module default {
         constraint exclusive on ((.display_name, .tag));
         required user: User {
             constraint exclusive;
-            on source delete delete target;
+            on target delete delete source;
         };
     }
 
     type OAuth2Account extending Base {
         required user: User {
-            on source delete delete target;
+            on target delete delete source;
         };
         required provider: str;
         required provider_user_id: str {
@@ -50,7 +50,9 @@ module default {
     }
 
     type Session extending Base {
-        required user: User;
+        required user: User {
+            on target delete delete source;
+        };
         required expires_at: datetime;
         required session_id: str {
             constraint exclusive;
@@ -61,7 +63,7 @@ module default {
     type EmailVerificationCode extending Base {
         required user: User {
             constraint exclusive;
-            on source delete delete target;
+            on target delete delete source;
         };
         required code: str;
         required expires_at: datetime;
@@ -69,7 +71,9 @@ module default {
     }
 
     type Community extending Base {
-        multi members: User;
+        multi members: User {
+            on target delete allow;
+        };
         multi channels := .<community[is Channel];
         multi messages := .<community[is Message];
         multi roles := .<community[is CommunityRole];
@@ -118,7 +122,7 @@ module default {
 
     type Message extending Base {
         required sender: User {
-            on source delete delete target;
+            on target delete delete source;
         };
         required content: str;
         community: Community;
@@ -126,7 +130,9 @@ module default {
     }
 
     type LastReadChannel extending Base {
-        required user: User;
+        required user: User {
+            on target delete delete source;
+        };
         required channel: Channel;
         required last_read_at: datetime {
             default := datetime_current();
