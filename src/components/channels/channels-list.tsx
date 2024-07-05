@@ -9,7 +9,6 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useParams } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 
 export const ChannelsList = ({ id }: { id: string }) => {
     const session = useAuth();

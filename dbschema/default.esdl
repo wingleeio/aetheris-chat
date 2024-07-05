@@ -33,11 +33,14 @@ module default {
         constraint exclusive on ((.display_name, .tag));
         required user: User {
             constraint exclusive;
+            on source delete delete target;
         };
     }
 
     type OAuth2Account extending Base {
-        required user: User;
+        required user: User {
+            on source delete delete target;
+        };
         required provider: str;
         required provider_user_id: str {
             constraint exclusive;
@@ -58,6 +61,7 @@ module default {
     type EmailVerificationCode extending Base {
         required user: User {
             constraint exclusive;
+            on source delete delete target;
         };
         required code: str;
         required expires_at: datetime;
@@ -113,7 +117,9 @@ module default {
     }
 
     type Message extending Base {
-        required sender: User;
+        required sender: User {
+            on source delete delete target;
+        };
         required content: str;
         community: Community;
         channel: Channel;
