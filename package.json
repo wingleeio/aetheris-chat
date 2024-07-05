@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
+        "prebuild": "yarn add sharp --ignore-engines",
         "dev": "tsx watch ./src/index.ts",
         "build:server": "yarn tsc --project tsconfig.server.json && tsc-alias --project tsconfig.server.json",
         "build:next": "next build",
