@@ -22,6 +22,8 @@ export const createContext = (req: IncomingMessage) => ({
 
 const aether = createAetheris<typeof createContext>();
 
+export const base = aether;
+
 export const action = aether
     .use(({ logger, path, ip }) => {
         let childLogger = logger.child({ path, ip });

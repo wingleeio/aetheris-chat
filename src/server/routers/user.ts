@@ -63,4 +63,9 @@ export const user = {
                 });
         },
     }),
+    getMyEmojis: userVerifiedAction.handler({
+        resolve: async ({ database }) => {
+            return database.getAllEmojis();
+        },
+    }),
 };

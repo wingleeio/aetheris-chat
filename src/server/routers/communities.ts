@@ -1,5 +1,5 @@
 import { Events } from "@/lib/events";
-import { userRequiredAction, userVerifiedAction } from "@/server/aether";
+import { action, base, userRequiredAction, userVerifiedAction } from "@/server/aether";
 
 import { ApiError } from "@/server/error";
 import { z } from "zod";
@@ -160,7 +160,7 @@ export const communities = {
         input: z.object({
             community_id: z.string(),
             emoji: z.string(),
-            code: z.string(),
+            code: z.string().regex(/^[A-Za-z0-9]+$/, "Only alphanumeric characters are allowed"),
         }),
         resolve: async ({ database, input, files }) => {
             await database.transaction(async (tx) => {

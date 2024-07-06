@@ -2,6 +2,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { ClientProvider } from "@/components/providers/client-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { auth } from "@/lib/auth";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 type OmitChildren<P> = Omit<P, "children">;
 
@@ -19,6 +20,7 @@ const combineProviders = (providers: ProviderProps<any>[]) => {
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
     const CombinedProvider = combineProviders([
+        [TooltipProvider, {}],
         [ClientProvider, {}],
         [AuthProvider, { session: auth() }],
         [

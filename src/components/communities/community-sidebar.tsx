@@ -17,8 +17,8 @@ export const CommunitySidebar = () => {
             )}
         >
             <div className="flex-grow text-sm flex flex-col">
-                <CommunityBanner id={params.community} />
-                <ChannelsList id={params.community} />
+                <CommunityBanner />
+                <ChannelsList />
             </div>
             <MyProfile />
         </div>

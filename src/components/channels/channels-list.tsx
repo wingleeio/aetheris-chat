@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useParams } from "next/navigation";
 
-export const ChannelsList = ({ id }: { id: string }) => {
+export const ChannelsList = () => {
     const session = useAuth();
-    const params = useParams<{ channel?: string }>();
+    const params = useParams<{ channel?: string; community: string }>();
     const { queryClient } = useAetherisContext();
     const { data, queryKey } = client.channels.getChannels.useQuery({
         input: {
-            community_id: id,
+            community_id: params.community,
         },
         gcTime: 0,
     });
@@ -31,7 +31,7 @@ export const ChannelsList = ({ id }: { id: string }) => {
 
     client.channels.listenForUnreadChannelMessages.useSubscription({
         input: {
-            community_id: id,
+            community_id: params.community,
         },
         dependencies: [params.channel],
         onMessage: (channelId) => {
@@ -56,7 +56,7 @@ export const ChannelsList = ({ id }: { id: string }) => {
             {data?.map((channel) => (
                 <Link
                     key={channel.id}
-                    href={`/community/${id}/channel/${channel.id}`}
+                    href={`/community/${params.community}/channel/${channel.id}`}
                     className={cn(
                         "flex gap-4 items-center text-muted-foreground cursor-pointer hover:bg-background transition-all px-4 py-2 group relative",
                         channel.id === params.channel ? "bg-background" : "",

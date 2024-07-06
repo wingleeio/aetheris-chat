@@ -1,6 +1,11 @@
-select Emoji {
+select Community {
   id,
-  code,
-  emoji_url,
+  name,
+  icon_url,
+  emojis: {
+    id,
+    code,
+    emoji_url,
+  }
 }
-filter .community.members.id = global current_user_id
+filter .members.id = global current_user_id
