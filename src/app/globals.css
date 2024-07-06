@@ -92,7 +92,7 @@
 
 span[data-type="emoji"] > img {
     display: inline-block;
-    max-width: 1em;
-    max-height: 1em;
+    max-width: 1.5em;
+    max-height: 1.5em;
     margin: 0;
 }

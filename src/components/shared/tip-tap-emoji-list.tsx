@@ -63,12 +63,15 @@ export const TipTapEmojiList = forwardRef<unknown, TipTapEmojiListProps>((props,
         <div className="bg-background shadow-sm flex flex-col gap-2 p-2 rounded-sm">
             {props.items.map((item, index) => (
                 <button
-                    className={cn(index === selectedIndex && "bg-muted", "flex items-center gap-2 px-2 rounded-sm")}
+                    className={cn(
+                        index === selectedIndex && "bg-muted",
+                        "flex items-center gap-2 px-2 py-1 rounded-sm text-sm text-muted-foreground"
+                    )}
                     key={index}
                     onClick={() => selectItem(index)}
                 >
-                    {item.fallbackImage ? <img src={item.fallbackImage} className="h-[1em] w-[1em]" /> : item.emoji}:
-                    {item.shortcodes[0]}:
+                    {item.fallbackImage ? <img src={item.fallbackImage} className="h-[1.5em] w-[1.5em]" /> : item.emoji}
+                    :{item.shortcodes[0]}:
                 </button>
             ))}
         </div>

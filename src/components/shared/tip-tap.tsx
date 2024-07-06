@@ -26,13 +26,17 @@ export const TipTap = (props: TipTapProps) => {
                 placeholder: props.placeholder ?? "Write something...",
             }),
             Emoji.configure({
-                emojis: props.emojis ?? [],
+                emojis: props.emojis ? [...props.emojis] : [],
+                enableEmoticons: true,
                 suggestion: TipTapEmojiSuggestion,
             }),
             Extension.create({
                 addKeyboardShortcuts() {
                     return {
-                        Enter: () => {
+                        Enter: ({ editor }) => {
+                            if (editor.isActive("emojiSuggestions")) {
+                                return true;
+                            }
                             if (props.onSubmit) {
                                 props.onSubmit();
                             }
