@@ -47,6 +47,11 @@ export const TipTapEmojiList = forwardRef<unknown, TipTapEmojiListProps>((props,
                         return true;
                     }
 
+                    if (x.event.key === "Tab") {
+                        downHandler();
+                        return true;
+                    }
+
                     if (x.event.key === "Enter") {
                         enterHandler();
                         return true;
@@ -60,19 +65,26 @@ export const TipTapEmojiList = forwardRef<unknown, TipTapEmojiListProps>((props,
     );
 
     return (
-        <div className="bg-background shadow-sm flex flex-col gap-2 p-2 rounded-sm">
+        <div className="bg-background shadow-sm border-muted border flex flex-col gap-1 p-2 rounded-md">
             {props.items.map((item, index) => (
-                <button
+                <div
                     className={cn(
                         index === selectedIndex && "bg-muted",
-                        "flex items-center gap-2 px-2 py-1 rounded-sm text-sm text-muted-foreground"
+                        "px-2 py-1 rounded-sm text-sm text-muted-foreground flex gap-10"
                     )}
                     key={index}
                     onClick={() => selectItem(index)}
                 >
-                    {item.fallbackImage ? <img src={item.fallbackImage} className="h-[1.5em] w-[1.5em]" /> : item.emoji}
-                    :{item.shortcodes[0]}:
-                </button>
+                    <div className="flex items-center gap-2 flex-grow">
+                        {item.fallbackImage ? (
+                            <img src={item.fallbackImage} className="h-[1.5em] w-[1.5em]" />
+                        ) : (
+                            item.emoji
+                        )}
+                        :{item.shortcodes[0]}:
+                    </div>
+                    <div className="align-right text-muted-foreground/50">{item.group}</div>
+                </div>
             ))}
         </div>
     );

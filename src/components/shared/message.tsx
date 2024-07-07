@@ -20,7 +20,7 @@ export const Message = ({
     });
 
     return (
-        <div className="text-muted-foreground text-sm flex gap-4">
+        <div className="text-muted-foreground text-sm flex gap-4 hover:bg-muted/50 rounded-sm p-1">
             <div className="w-10 min-w-10">
                 {profile.data ? (
                     <ProfileHoverCard profile={profile.data}>
@@ -33,7 +33,7 @@ export const Message = ({
                     !bundled && <Skeleton className="w-10 h-10 rounded-full" />
                 )}
             </div>
-            <div className="overflow-hidden">
+            <div className="overflow-hidden flex-grow">
                 {!bundled && (
                     <div className="text-foreground">
                         {profile.data ? (
@@ -44,7 +44,10 @@ export const Message = ({
                         <span className="text-xs text-muted-foreground/50">{formatTimestamp(message.created_at)}</span>
                     </div>
                 )}
-                <div className="prose max-w-full break-words" dangerouslySetInnerHTML={{ __html: message.content }} />
+                <div
+                    className="prose leading-[20px] text-muted-foreground max-w-full break-words min-w-full"
+                    dangerouslySetInnerHTML={{ __html: message.content }}
+                />
             </div>
         </div>
     );

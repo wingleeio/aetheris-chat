@@ -5,7 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
-import Emoji, { EmojiItem } from "@tiptap-pro/extension-emoji";
+import Emoji, { EmojiItem, gitHubEmojis } from "@tiptap-pro/extension-emoji";
 import { TipTapEmojiSuggestion } from "@/components/shared/tip-tap-emoji-suggestion";
 
 interface TipTapProps {
@@ -26,7 +26,7 @@ export const TipTap = (props: TipTapProps) => {
                 placeholder: props.placeholder ?? "Write something...",
             }),
             Emoji.configure({
-                emojis: props.emojis ? [...props.emojis] : [],
+                emojis: props.emojis ? [...props.emojis, ...gitHubEmojis] : [...gitHubEmojis],
                 enableEmoticons: true,
                 suggestion: TipTapEmojiSuggestion,
             }),
@@ -34,8 +34,10 @@ export const TipTap = (props: TipTapProps) => {
                 addKeyboardShortcuts() {
                     return {
                         Enter: ({ editor }) => {
-                            if (editor.isActive("emojiSuggestions")) {
-                                return true;
+                            //@ts-ignore
+                            const suggestions = editor.state["emojiSuggestion$"].active;
+                            if (suggestions) {
+                                return false;
                             }
                             if (props.onSubmit) {
                                 props.onSubmit();
@@ -48,7 +50,7 @@ export const TipTap = (props: TipTapProps) => {
         ],
         editorProps: {
             attributes: {
-                class: cn("prose max-w-full break-words overflow-hidden", props.className),
+                class: cn("prose leading-[20px] max-w-full break-words overflow-hidden", props.className),
             },
         },
         onUpdate: ({ editor }) => {

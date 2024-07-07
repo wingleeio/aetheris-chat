@@ -11,7 +11,7 @@ export const TipTapEmojiSuggestion: any = {
                     tags.find((tag) => tag.startsWith(query.toLowerCase()))
                 );
             })
-            .slice(0, 5);
+            .slice(0, 10);
     },
 
     allowSpaces: false,
@@ -33,7 +33,8 @@ export const TipTapEmojiSuggestion: any = {
                     showOnCreate: true,
                     interactive: true,
                     trigger: "manual",
-                    placement: "bottom-start",
+                    placement: "top-start",
+                    maxWidth: "none",
                 });
             },
 

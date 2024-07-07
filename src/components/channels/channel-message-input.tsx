@@ -60,7 +60,7 @@ export const ChannelMessageInput = () => {
                     name: emoji.id,
                     shortcodes: [emoji.code],
                     tags: [emoji.code],
-                    group: community.id,
+                    group: "Community: " + community.name,
                     fallbackImage: emoji.emoji_url,
                 });
             });
