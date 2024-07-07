@@ -90,6 +90,7 @@ export const ChannelMessages = () => {
                         {i === messages.data.pages.length - 1 && (
                             <InView
                                 as="div"
+                                className="h-4"
                                 onChange={(inView) => {
                                     if (
                                         inView &&
@@ -103,7 +104,7 @@ export const ChannelMessages = () => {
                             />
                         )}
                         {!page.has_more && (
-                            <div className="text-muted-foreground">
+                            <div className="text-muted-foreground px-4 pt-4">
                                 <div className="font-semibold"># {channel.data.name}</div>
                                 <div>This is the start of the conversation.</div>
                             </div>

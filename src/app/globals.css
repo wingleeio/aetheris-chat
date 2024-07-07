@@ -82,3 +82,17 @@
 *::-webkit-scrollbar {
     display: none; /* Safari and Chrome */
 }
+
+.tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+}
+
+span[data-type="emoji"] > img {
+    display: inline-block;
+    max-width: 20px;
+    max-height: 20px;
+    margin: 0;
+}

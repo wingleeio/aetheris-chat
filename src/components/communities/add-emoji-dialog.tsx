@@ -23,30 +23,33 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams } from "next/navigation";
 
 const schema = z.object({
-    name: z.string().min(1, "Required field"),
-    about: z.string().min(1, "Required field"),
-    icon: z.string().optional(),
-    cover: z.string().optional(),
+    emoji: z.string().min(1, "Required field"),
+    code: z
+        .string()
+        .min(1, "Required field")
+        .regex(/^[A-Za-z0-9]+$/, "Only alphanumeric characters are allowed"),
 });
 
 type Schema = z.infer<typeof schema>;
 
-export const EditCommunityDialog = ({
-    id,
-    children,
-    defaultValues,
-}: {
-    id: string;
-    children: React.ReactNode;
-    defaultValues: Schema;
-}) => {
+export const AddEmojiDialog = ({ children }: { children: React.ReactNode }) => {
     const { queryClient } = useAetherisContext();
     const [open, setOpen] = useState(false);
+    const params = useParams<{ community: string }>();
+    const { data } = client.communities.getCommunity.useQuery({
+        input: {
+            id: params.community,
+        },
+    });
     const form = useForm<Schema>({
         resolver: zodResolver(schema),
-        defaultValues,
+        defaultValues: {
+            emoji: "",
+            code: "",
+        },
     });
 
     const handleOpenChange = (open: boolean) => {
@@ -56,15 +59,12 @@ export const EditCommunityDialog = ({
         setOpen(open);
     };
 
-    const updateCommunity = client.communities.updateCommunity.useMutation({
+    const addEmoji = client.communities.addEmoji.useMutation({
         onSuccess: (community) => {
             setOpen(false);
             queryClient.invalidateQueries({
-                queryKey: helpers.communities.getMyCommunities.getQueryKey(),
-            });
-            queryClient.invalidateQueries({
                 queryKey: helpers.communities.getCommunity.getQueryKey({
-                    id: community.id,
+                    id: params.community,
                 }),
             });
             form.reset();
@@ -77,8 +77,8 @@ export const EditCommunityDialog = ({
     });
 
     const onSubmit = async (data: z.infer<typeof schema>) =>
-        updateCommunity.mutate({
-            id,
+        addEmoji.mutate({
+            community_id: params.community,
             ...data,
         });
 
@@ -92,31 +92,21 @@ export const EditCommunityDialog = ({
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-                        <div className="mb-[32px] relative text-sm">
+                        <div className="mb-3 relative text-sm">
                             <ImageUploadInput
-                                name="cover"
-                                defaultValue={defaultValues.cover}
-                                className="bg-indigo-500 h-24 rounded-sm cursor-pointer group position relative"
+                                name="emoji"
+                                className="bg-indigo-500 h-10 w-10 cursor-pointer group position relative"
                                 setImageValue={form.setValue}
-                                aspect={16 / 9}
                             >
                                 <EditIcon className="h-4 w-4" />
-                            </ImageUploadInput>
-                            <ImageUploadInput
-                                name="icon"
-                                defaultValue={defaultValues.icon}
-                                className="bg-indigo-500 h-[96px] w-[96px] rounded-full absolute bottom-[-20px] left-[8px] border-[3px] border-background"
-                                setImageValue={form.setValue}
-                            >
-                                <EditIcon className="h-4 w-4 text-white" />
                             </ImageUploadInput>
                         </div>
                         <FormField
                             control={form.control}
-                            name="name"
+                            name="code"
                             render={({ field }) => (
                                 <FormItem className="w-full mb-4 text-muted-foreground">
-                                    <FormLabel className="whitespace-nowrap">Name</FormLabel>
+                                    <FormLabel className="whitespace-nowrap">Code</FormLabel>
                                     <FormControl>
                                         <Input {...field} />
                                     </FormControl>
@@ -124,24 +114,11 @@ export const EditCommunityDialog = ({
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="about"
-                            render={({ field }) => (
-                                <FormItem className="w-full mb-4 text-muted-foreground">
-                                    <FormLabel className="whitespace-nowrap">About</FormLabel>
-                                    <FormControl>
-                                        <Textarea {...field} />
-                                    </FormControl>
-                                    <FormMessage className="text-xs opacity-80 font-normal" />
-                                </FormItem>
-                            )}
-                        />
 
                         <DialogFooter>
-                            <Button type="submit" className="w-full gap-2" disabled={updateCommunity.isPending}>
-                                <span>Update community</span>
-                                {updateCommunity.isPending ?? <Loader2 className="h-4 w-4 animate-spin" />}
+                            <Button type="submit" className="w-full gap-2" disabled={addEmoji.isPending}>
+                                <span>Add Emoji</span>
+                                {addEmoji.isPending ?? <Loader2 className="h-4 w-4 animate-spin" />}
                             </Button>
                         </DialogFooter>
                     </form>

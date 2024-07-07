@@ -1,6 +1,6 @@
 "use client";
 
-import { EditIcon, LogOut, PlusIcon } from "lucide-react";
+import { EditIcon, LogOut, PlusIcon, SmileIcon } from "lucide-react";
 
 import { AddChannelDialog } from "@/components/channels/add-channel-dialog";
 import { EditCommunityDialog } from "@/components/communities/edit-community-dialog";
@@ -8,19 +8,21 @@ import { client, useAetherisContext } from "@/lib/client";
 import { useAuth } from "@/hooks/use-auth";
 import { ConfirmDialog } from "../shared/confirm-dialog";
 import { helpers } from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { EmojiManagementDialog } from "@/components/communities/emoji-management-dialog";
 
-export const CommunityBanner = ({ id }: { id: string }) => {
+export const CommunityBanner = () => {
+    const params = useParams<{ community: string }>();
     const session = useAuth();
     const router = useRouter();
     const { queryClient } = useAetherisContext();
     const { data } = client.communities.getCommunity.useQuery({
         input: {
-            id,
+            id: params.community,
         },
     });
 
-    const leaveChannel = client.communities.leaveCommunity.useMutation({
+    const leaveCommunity = client.communities.leaveCommunity.useMutation({
         onSuccess: () => {
             router.replace("/");
             queryClient.invalidateQueries({
@@ -46,15 +48,22 @@ export const CommunityBanner = ({ id }: { id: string }) => {
                     <div>{data?.name}</div>
                     <div className="flex-grow" />
                     {data?.owner_id === session?.user?.id && (
-                        <AddChannelDialog id={id}>
+                        <AddChannelDialog id={params.community}>
                             <button>
                                 <PlusIcon className="h-3 hover:text-indigo-300" />
                             </button>
                         </AddChannelDialog>
                     )}
                     {data?.owner_id === session?.user?.id && (
+                        <EmojiManagementDialog>
+                            <button>
+                                <SmileIcon className="h-3 hover:text-indigo-300" />
+                            </button>
+                        </EmojiManagementDialog>
+                    )}
+                    {data?.owner_id === session?.user?.id && (
                         <EditCommunityDialog
-                            id={id}
+                            id={params.community}
                             defaultValues={{
                                 name: data.name,
                                 about: data.about,
@@ -72,8 +81,8 @@ export const CommunityBanner = ({ id }: { id: string }) => {
                             title="Leave community"
                             description="Are you sure you want to leave this community?"
                             onConfirm={() => {
-                                leaveChannel.mutate({
-                                    id,
+                                leaveCommunity.mutate({
+                                    id: params.community,
                                 });
                             }}
                         >

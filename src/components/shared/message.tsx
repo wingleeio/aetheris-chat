@@ -18,29 +18,36 @@ export const Message = ({
             user_id: message.sender_id,
         },
     });
-    if (!profile.data) {
-        return null;
-    }
+
     return (
-        <div className="text-muted-foreground text-sm flex gap-4">
+        <div className="text-muted-foreground text-sm flex gap-4 hover:bg-muted/50 rounded-sm p-1">
             <div className="w-10 min-w-10">
-                <ProfileHoverCard profile={profile.data}>
-                    <Avatar className={cn(bundled && "hidden", "cursor-pointer")}>
-                        <AvatarImage src={profile.data.avatar_url ?? ""} />
-                        <AvatarFallback>{profile.data.display_name}</AvatarFallback>
-                    </Avatar>
-                </ProfileHoverCard>
+                {profile.data ? (
+                    <ProfileHoverCard profile={profile.data}>
+                        <Avatar className={cn(bundled && "hidden", "cursor-pointer")}>
+                            <AvatarImage src={profile.data.avatar_url ?? ""} />
+                            <AvatarFallback>{profile.data.display_name}</AvatarFallback>
+                        </Avatar>
+                    </ProfileHoverCard>
+                ) : (
+                    !bundled && <Skeleton className="w-10 h-10 rounded-full" />
+                )}
             </div>
-            <div>
+            <div className="overflow-hidden flex-grow">
                 {!bundled && (
                     <div className="text-foreground">
-                        <ProfileHoverCard profile={profile.data}>
-                            <span className="cursor-pointer">{profile.data.display_name} </span>
-                        </ProfileHoverCard>
+                        {profile.data ? (
+                            <ProfileHoverCard profile={profile.data}>
+                                <span className="cursor-pointer">{profile.data.display_name}</span>
+                            </ProfileHoverCard>
+                        ) : null}{" "}
                         <span className="text-xs text-muted-foreground/50">{formatTimestamp(message.created_at)}</span>
                     </div>
                 )}
-                <div>{message.content}</div>
+                <div
+                    className="prose leading-[20px] text-muted-foreground max-w-full break-words min-w-full"
+                    dangerouslySetInnerHTML={{ __html: message.content }}
+                />
             </div>
         </div>
     );
