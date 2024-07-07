@@ -60,7 +60,7 @@ export const AddEmojiDialog = ({ children }: { children: React.ReactNode }) => {
     };
 
     const addEmoji = client.communities.addEmoji.useMutation({
-        onSuccess: (community) => {
+        onSuccess: () => {
             setOpen(false);
             queryClient.invalidateQueries({
                 queryKey: helpers.communities.getCommunity.getQueryKey({
@@ -87,7 +87,7 @@ export const AddEmojiDialog = ({ children }: { children: React.ReactNode }) => {
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Edit Community</DialogTitle>
+                    <DialogTitle>Add Emoji</DialogTitle>
                     <DialogDescription>Customize your community.</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
