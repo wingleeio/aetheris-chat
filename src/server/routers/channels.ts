@@ -2,6 +2,7 @@ import { ApiError } from "next/dist/server/api-utils";
 import { Events } from "@/lib/events";
 import { userVerifiedAction } from "@/server/aether";
 import { z } from "zod";
+import sanitizeHtml from "sanitize-html";
 
 export const channels = {
     getChannel: userVerifiedAction.handler({
@@ -101,7 +102,13 @@ export const channels = {
 
                 const message = await tx.sendChannelMessage({
                     channel_id: input.channel_id,
-                    content: input.content,
+                    content: sanitizeHtml(input.content, {
+                        allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
+                        allowedAttributes: {
+                            ...sanitizeHtml.defaults.allowedAttributes,
+                            span: ["data-type", "data-name"],
+                        },
+                    }),
                 });
 
                 const community = await tx.getCommunityFromChannel({
