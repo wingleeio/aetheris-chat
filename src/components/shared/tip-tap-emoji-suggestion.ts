@@ -8,7 +8,7 @@ export const TipTapEmojiSuggestion: any = {
             .filter(({ shortcodes, tags }: { shortcodes: string[]; tags: string[] }) => {
                 return (
                     shortcodes.find((shortcode) => shortcode.startsWith(query.toLowerCase())) ||
-                    tags.find((tag) => tag.startsWith(query.toLowerCase()))
+                    tags.find((tag) => tag.toLowerCase().startsWith(query.toLowerCase()))
                 );
             })
             .slice(0, 10);

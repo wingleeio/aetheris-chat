@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { client, useAetherisContext } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { profile } from "console";
 
 export const MyCommunities = () => {
     const params = useParams<{ community?: string; channel?: string }>();
@@ -45,19 +47,17 @@ export const MyCommunities = () => {
             <div className="flex flex-col gap-2 items-center pl-4 pr-2">
                 {data.map((community) => (
                     <CommunityHoverCard key={community.id} community={community}>
-                        <Link
-                            href={`/community/${community.id}`}
-                            className={cn(
-                                "w-12 h-12 transition-all relative",
-                                params.community === community.id && "rounded-lg",
-                                params.community !== community.id && "rounded-3xl hover:rounded-xl"
-                            )}
-                            style={{
-                                backgroundImage: `url(${community.icon_url})`,
-                                backgroundSize: "cover",
-                                backgroundPosition: "center",
-                            }}
-                        >
+                        <Link href={`/community/${community.id}`} className="relative">
+                            <Avatar
+                                className={cn(
+                                    "w-12 h-12 transition-all relative",
+                                    params.community === community.id && "rounded-lg",
+                                    params.community !== community.id && "rounded-3xl hover:rounded-xl"
+                                )}
+                            >
+                                <AvatarImage src={community.icon_url ?? ""} />
+                                <AvatarFallback>{community.name}</AvatarFallback>
+                            </Avatar>
                             {community.has_unread && (
                                 <div className="w-3 h-3 bg-indigo-500 rounded-full absolute top-[50%] translate-y-[-50%] left-[-23px] z-10" />
                             )}
