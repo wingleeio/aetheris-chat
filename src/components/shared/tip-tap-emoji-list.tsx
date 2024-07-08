@@ -65,7 +65,7 @@ export const TipTapEmojiList = forwardRef<unknown, TipTapEmojiListProps>((props,
     );
 
     return (
-        <div className="bg-background shadow-sm border-muted border flex flex-col gap-1 p-2 rounded-md">
+        <div className="bg-background shadow-sm border-muted border flex flex-col gap-1 p-1 rounded-lg">
             {props.items.map((item, index) => (
                 <div
                     className={cn(
