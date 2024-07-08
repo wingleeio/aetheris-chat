@@ -3,7 +3,7 @@ import { TipTapEmojiList } from "@/components/shared/tip-tap-emoji-list";
 import tippy from "tippy.js";
 
 export const TipTapEmojiSuggestion: any = {
-    items: ({ editor, query }: { editor: Editor; query: string }) => {
+    items: async ({ editor, query }: { editor: Editor; query: string }) => {
         return editor.storage.emoji.emojis
             .filter(({ shortcodes, tags }: { shortcodes: string[]; tags: string[] }) => {
                 return (

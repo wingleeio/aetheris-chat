@@ -68,4 +68,14 @@ export const user = {
             return database.getAllEmojis();
         },
     }),
+    searchMyEmojis: userVerifiedAction.handler({
+        input: z.object({
+            search: z.string().min(2, "Search term must be at least 2 characters long"),
+        }),
+        resolve: ({ input, database }) => {
+            return database.searchEmojis({
+                search: input.search,
+            });
+        },
+    }),
 };

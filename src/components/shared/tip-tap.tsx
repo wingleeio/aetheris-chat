@@ -3,10 +3,11 @@
 import { useEditor, EditorContent, Extension } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import Emoji, { EmojiItem, gitHubEmojis } from "@tiptap-pro/extension-emoji";
 import { TipTapEmojiSuggestion } from "@/components/shared/tip-tap-emoji-suggestion";
+import { client } from "@/lib/client";
 
 interface TipTapProps {
     className?: string;
@@ -14,10 +15,33 @@ interface TipTapProps {
     value?: string;
     onSubmit?: () => void;
     onChange?: (content: string) => void;
-    emojis?: EmojiItem[];
 }
 
 export const TipTap = (props: TipTapProps) => {
+    const { data } = client.user.getMyEmojis.useQuery();
+    const emojis = useMemo(() => {
+        if (!data) return [];
+
+        const emojis: EmojiItem[] = [];
+
+        data.forEach((emoji) => {
+            emojis.push({
+                name: emoji.id,
+                shortcodes: [emoji.code],
+                tags: [emoji.code],
+                group: "Community: " + emoji.community.name,
+                fallbackImage: emoji.emoji_url,
+            });
+        });
+        return emojis;
+    }, [data]);
+
+    if (!data) return null;
+
+    return <_TipTap {...props} emojis={emojis} />;
+};
+
+const _TipTap = (props: TipTapProps & { emojis: EmojiItem[] }) => {
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -26,7 +50,7 @@ export const TipTap = (props: TipTapProps) => {
                 placeholder: props.placeholder ?? "Write something...",
             }),
             Emoji.configure({
-                emojis: props.emojis ? [...props.emojis, ...gitHubEmojis] : [...gitHubEmojis],
+                emojis: [...props.emojis, ...gitHubEmojis],
                 enableEmoticons: true,
                 suggestion: TipTapEmojiSuggestion,
             }),

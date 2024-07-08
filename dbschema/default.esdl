@@ -83,17 +83,6 @@ module default {
         required about: str;
         required name: str;
         required owner: User;
-
-        index fts::index on ((
-            fts::with_options(
-                .name,
-                language := fts::Language.eng
-            ),
-            fts::with_options(
-                .about,
-                language := fts::Language.eng
-            )
-        ));
     }
 
     scalar type CommunityPermission extending enum<

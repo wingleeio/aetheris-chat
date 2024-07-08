@@ -1,5 +1,5 @@
 import { Events } from "@/lib/events";
-import { action, base, userRequiredAction, userVerifiedAction } from "@/server/aether";
+import { userRequiredAction, userVerifiedAction } from "@/server/aether";
 
 import { ApiError } from "@/server/error";
 import { z } from "zod";

@@ -39,11 +39,6 @@ export const AddEmojiDialog = ({ children }: { children: React.ReactNode }) => {
     const { queryClient } = useAetherisContext();
     const [open, setOpen] = useState(false);
     const params = useParams<{ community: string }>();
-    const { data } = client.communities.getCommunity.useQuery({
-        input: {
-            id: params.community,
-        },
-    });
     const form = useForm<Schema>({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -66,6 +61,9 @@ export const AddEmojiDialog = ({ children }: { children: React.ReactNode }) => {
                 queryKey: helpers.communities.getCommunity.getQueryKey({
                     id: params.community,
                 }),
+            });
+            queryClient.invalidateQueries({
+                queryKey: helpers.user.getMyEmojis.getQueryKey(),
             });
             form.reset();
         },

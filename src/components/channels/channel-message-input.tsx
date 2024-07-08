@@ -4,9 +4,7 @@ import { TipTap } from "@/components/shared/tip-tap";
 import { Form, FormField } from "@/components/ui/form";
 import { client } from "@/lib/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EmojiItem } from "@tiptap-pro/extension-emoji";
 import { useParams } from "next/navigation";
-import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -24,7 +22,6 @@ export const ChannelMessageInput = () => {
             channel_id: params.channel,
         },
     });
-    const { data } = client.user.getMyEmojis.useQuery();
 
     const form = useForm<Schema>({
         resolver: zodResolver(schema),
@@ -49,28 +46,6 @@ export const ChannelMessageInput = () => {
         });
     };
 
-    const emojis = useMemo(() => {
-        if (!data) return [];
-
-        const emojis: EmojiItem[] = [];
-
-        data.forEach((community) => {
-            community.emojis.forEach((emoji) => {
-                emojis.push({
-                    name: emoji.id,
-                    shortcodes: [emoji.code],
-                    tags: [emoji.code],
-                    group: "Community: " + community.name,
-                    fallbackImage: emoji.emoji_url,
-                });
-            });
-        });
-
-        return emojis;
-    }, [data]);
-
-    if (!data) return null;
-
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full relative overflow-x-hidden">
@@ -84,7 +59,6 @@ export const ChannelMessageInput = () => {
                             onSubmit={form.handleSubmit(onSubmit)}
                             onChange={field.onChange}
                             value={field.value}
-                            emojis={emojis}
                         />
                     )}
                 />
