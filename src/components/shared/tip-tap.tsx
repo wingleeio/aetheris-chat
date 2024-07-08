@@ -44,6 +44,14 @@ export const TipTap = (props: TipTapProps) => {
                             }
                             return true;
                         },
+                        ["Shift-Enter"]: ({ editor }) => {
+                            return editor.commands.first(({ commands }) => [
+                                () => commands.newlineInCode(),
+                                () => commands.createParagraphNear(),
+                                () => commands.liftEmptyBlock(),
+                                () => commands.splitBlock(),
+                            ]);
+                        },
                     };
                 },
             }),
