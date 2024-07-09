@@ -104,8 +104,6 @@ export const channels = {
                     throw new ApiError(403, "You must be a member of the community to send messages to this channel.");
                 }
 
-                console.log(input);
-
                 const message = await tx.sendChannelMessage({
                     channel_id: input.channel_id,
                     message_id: input.message_id,
