@@ -29,6 +29,7 @@ export const Message = ({
 
     return (
         <div
+            id={message.id}
             className={cn(
                 "text-muted-foreground text-sm flex gap-4 hover:bg-muted/65 rounded-sm p-1 relative group",
                 isTemp && "opacity-50",
