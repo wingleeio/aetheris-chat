@@ -39,7 +39,9 @@ export const Message = ({
                 <div className="absolute opacity-0 group-hover:opacity-100 h-6 bg-muted gap-[1px] border-muted border rounded-lg right-3 top-[-12px] z-10 overflow-hidden">
                     <button
                         className="h-full px-3 text-xs bg-background hover:bg-muted/30"
-                        onClick={() => setReplyingTo(message)}
+                        onClick={() => {
+                            setReplyingTo(message);
+                        }}
                     >
                         <Reply className="h-3 w-3" />
                     </button>

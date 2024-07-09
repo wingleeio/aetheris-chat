@@ -11,11 +11,10 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { v4 } from "uuid";
 import { z } from "zod";
-import { api } from "@/lib/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Reply, X } from "lucide-react";
 import { ChannelContext } from "@/components/channels/channel-context";
-import { useCallback, useContext } from "react";
+import { useContext, useRef } from "react";
 
 const schema = z.object({
     content: z.string().min(1),
@@ -24,6 +23,7 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export const ChannelMessageInput = () => {
+    const buttonRef = useRef<HTMLButtonElement>(null);
     const { replyingTo, setReplyingTo } = useContext(ChannelContext);
     const { queryClient } = useAetherisContext();
     const session = useAuth();
@@ -64,34 +64,31 @@ export const ChannelMessageInput = () => {
         },
     });
 
-    const onSubmit = useCallback(
-        async (data: z.infer<typeof schema>) => {
-            form.reset();
-            const temp_id = v4() + "-temp";
-            queryClient.setQueryData(messages.queryKey, (cache: any) => {
-                cache.pages[0].messages.push({
-                    id: temp_id,
-                    sender_id: session.user!.id,
-                    created_at: new Date().toISOString(),
-                    content: data.content,
-                    reply_to: replyingTo && {
-                        id: replyingTo.id,
-                        sender_id: replyingTo.sender_id,
-                        content: replyingTo.content,
-                    },
-                });
-                return cache;
+    const onSubmit = async (data: z.infer<typeof schema>) => {
+        form.reset();
+        const temp_id = v4() + "-temp";
+        queryClient.setQueryData(messages.queryKey, (cache: any) => {
+            cache.pages[0].messages.push({
+                id: temp_id,
+                sender_id: session.user!.id,
+                created_at: new Date().toISOString(),
+                content: data.content,
+                reply_to: replyingTo && {
+                    id: replyingTo.id,
+                    sender_id: replyingTo.sender_id,
+                    content: replyingTo.content,
+                },
             });
-            sendMessage.mutate({
-                ...data,
-                temp_id,
-                channel_id: params.channel,
-                message_id: replyingTo?.id,
-            });
-            setReplyingTo(null);
-        },
-        [replyingTo, setReplyingTo]
-    );
+            return cache;
+        });
+        sendMessage.mutate({
+            ...data,
+            temp_id,
+            channel_id: params.channel,
+            message_id: replyingTo?.id,
+        });
+        setReplyingTo(null);
+    };
 
     return (
         <Form {...form}>
@@ -129,13 +126,18 @@ export const ChannelMessageInput = () => {
                             <TipTap
                                 className="p-1 outline-none focus:outline-none text-muted-foreground"
                                 placeholder={`Message #${channel.data?.name}`}
-                                onSubmit={form.handleSubmit(onSubmit)}
+                                onSubmit={() => {
+                                    if (buttonRef.current) {
+                                        buttonRef.current.click();
+                                    }
+                                }}
                                 onChange={field.onChange}
                                 value={field.value}
                             />
                         </div>
                     )}
                 />
+                <button type="submit" className="hidden" ref={buttonRef} />
             </form>
         </Form>
     );

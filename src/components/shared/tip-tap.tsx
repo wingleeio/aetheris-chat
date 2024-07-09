@@ -55,6 +55,16 @@ const _TipTap = (props: TipTapProps & { emojis: EmojiItem[] }) => {
                 suggestion: TipTapEmojiSuggestion,
             }),
             Extension.create({
+                name: "aetheris-chat",
+                addCommands() {
+                    return {
+                        newlineInCode() {
+                            return ({ state }) => {
+                                return true;
+                            };
+                        },
+                    };
+                },
                 addKeyboardShortcuts() {
                     return {
                         Enter: ({ editor }) => {
