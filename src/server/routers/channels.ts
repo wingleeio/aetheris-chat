@@ -79,6 +79,7 @@ export const channels = {
                     take: input.take,
                 });
             });
+
             return {
                 messages: page.messages.sort((a, b) => a.created_at.getTime() - b.created_at.getTime()),
                 has_more: page.has_more,
@@ -90,6 +91,7 @@ export const channels = {
             temp_id: z.string(),
             channel_id: z.string(),
             message_id: z.string().optional(),
+            reply_id: z.string().optional(),
             content: z.string(),
         }),
         resolve: async ({ database, input, events, user }) => {
@@ -101,6 +103,8 @@ export const channels = {
                 if (!isChannelMember) {
                     throw new ApiError(403, "You must be a member of the community to send messages to this channel.");
                 }
+
+                console.log(input);
 
                 const message = await tx.sendChannelMessage({
                     channel_id: input.channel_id,

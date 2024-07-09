@@ -1,6 +1,6 @@
 import { ChannelBanner } from "@/components/channels/channel-banner";
-import { ChannelMessageInput } from "@/components/channels/channel-message-input";
-import { ChannelMessages } from "@/components/channels/channel-messages";
+import { ChannelBody } from "@/components/channels/channel-body";
+
 import { DEFAULT_ID } from "@/constants";
 import { helpers } from "@/lib/api";
 import { HydrationBoundary } from "@tanstack/react-query";
@@ -22,10 +22,7 @@ export default async function Page({ params }: { params: { channel: string } }) 
     return (
         <HydrationBoundary state={helpers.dehydrate()}>
             <ChannelBanner />
-            <div className="px-4 pb-4 flex flex-col flex-grow">
-                <ChannelMessages />
-                <ChannelMessageInput />
-            </div>
+            <ChannelBody />
         </HydrationBoundary>
     );
 }

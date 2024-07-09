@@ -7,6 +7,9 @@ import { client } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { Reply, Smile } from "lucide-react";
 import { MessageReactPopover } from "@/components/shared/message-react-popover";
+import { ChannelContext } from "@/components/channels/channel-context";
+import { useContext } from "react";
+import { MessageReply } from "@/components/shared/message-reply";
 
 export const Message = ({
     message,
@@ -15,6 +18,7 @@ export const Message = ({
     message: Awaited<ReturnType<typeof api.channels.getMessageFromChannel>>["messages"][0];
     bundled?: boolean;
 }) => {
+    const { replyingTo, setReplyingTo } = useContext(ChannelContext);
     const profile = client.user.getProfile.useQuery({
         input: {
             user_id: message.sender_id,
@@ -27,19 +31,23 @@ export const Message = ({
         <div
             className={cn(
                 "text-muted-foreground text-sm flex gap-4 hover:bg-muted/65 rounded-sm p-1 relative group",
-                isTemp && "opacity-50"
+                isTemp && "opacity-50",
+                replyingTo?.id === message.id && "bg-muted/65"
             )}
         >
-            {/* {!isTemp && (
+            {!isTemp && (
                 <div className="absolute opacity-0 group-hover:opacity-100 h-6 bg-muted gap-[1px] border-muted border rounded-lg right-3 top-[-12px] z-10 overflow-hidden">
-                    <button className="h-full px-3 text-xs bg-background hover:bg-muted/30">
+                    <button
+                        className="h-full px-3 text-xs bg-background hover:bg-muted/30"
+                        onClick={() => setReplyingTo(message)}
+                    >
                         <Reply className="h-3 w-3" />
                     </button>
-                    <MessageReactPopover id={message.id}>
+                    {/* <MessageReactPopover id={message.id}>
                         <Smile className="h-3 w-3" />
-                    </MessageReactPopover>
+                    </MessageReactPopover> */}
                 </div>
-            )} */}
+            )}
             <div className="w-10 min-w-10">
                 {profile.data ? (
                     <ProfileHoverCard profile={profile.data}>
@@ -63,6 +71,7 @@ export const Message = ({
                         <span className="text-xs text-muted-foreground/50">{formatTimestamp(message.created_at)}</span>
                     </div>
                 )}
+                {message.reply_to && <MessageReply {...message.reply_to} />}
                 <div
                     className="prose leading-[20px] text-muted-foreground max-w-full break-words min-w-full"
                     dangerouslySetInnerHTML={{ __html: message.content }}
