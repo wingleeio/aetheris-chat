@@ -16,7 +16,7 @@ export default function Layout({
             <div className="flex flex-col py-2 gap-2">
                 <div className="pl-4 pr-2">
                     <Link
-                        href="/"
+                        href="/home"
                         className="w-12 h-12 rounded-sm text-muted-foreground text-2xl flex justify-center items-center hover:text-indigo-500"
                     >
                         <FaHome />

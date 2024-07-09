@@ -20,7 +20,7 @@ export const Message = ({
     });
 
     return (
-        <div className="text-muted-foreground text-sm flex gap-4 hover:bg-muted/50 rounded-sm p-1">
+        <div className="text-muted-foreground text-sm flex gap-4 hover:bg-muted/65 rounded-sm p-1">
             <div className="w-10 min-w-10">
                 {profile.data ? (
                     <ProfileHoverCard profile={profile.data}>
