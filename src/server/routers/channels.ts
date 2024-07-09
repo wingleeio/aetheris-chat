@@ -87,7 +87,9 @@ export const channels = {
     }),
     sendMessageToChannel: userVerifiedAction.handler({
         input: z.object({
+            temp_id: z.string(),
             channel_id: z.string(),
+            message_id: z.string().optional(),
             content: z.string(),
         }),
         resolve: async ({ database, input, events, user }) => {
@@ -102,6 +104,7 @@ export const channels = {
 
                 const message = await tx.sendChannelMessage({
                     channel_id: input.channel_id,
+                    message_id: input.message_id,
                     content: sanitizeHtml(input.content, {
                         allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
                         allowedAttributes: {
@@ -118,7 +121,7 @@ export const channels = {
                 return { message, community };
             });
 
-            events.emit("message", input.channel_id, results.message);
+            events.emit("message", input.channel_id, results.message, input.temp_id);
             events.emit("unreadCommunityChannel", results.community!.id, input.channel_id, user.id);
             events.emit("unreadCommunity", results.community!.id, input.channel_id, user.id);
 
@@ -131,10 +134,19 @@ export const channels = {
         }),
         output: z.object({
             id: z.string(),
+            temp_id: z.string(),
             sender_id: z.string(),
             content: z.string(),
             created_at: z.date(),
             updated_at: z.date(),
+            reply_to: z
+                .object({
+                    id: z.string(),
+                    sender_id: z.string(),
+                    content: z.string(),
+                })
+                .optional(),
+            reactions: z.array(z.any()),
         }),
         resolve: async ({ database, input, emit, events }) => {
             const isChannelMember = await database.isChannelMember({
@@ -145,14 +157,19 @@ export const channels = {
                 throw new ApiError(403, "You must be a member of the community to listen to this channel.");
             }
 
-            const onMessage: Events["message"] = async (channel, message) => {
+            const onMessage: Events["message"] = async (channel, message, temp_id) => {
                 if (channel === input.channel_id) {
                     await database
                         .markAsRead({
                             channel_id: input.channel_id,
                         })
                         .catch();
-                    emit(message);
+
+                    emit({
+                        temp_id,
+                        ...message,
+                        reply_to: message.reply_to ?? undefined,
+                    });
                 }
             };
 
@@ -236,6 +253,42 @@ export const channels = {
             });
 
             return channel;
+        },
+    }),
+    reactToMessage: userVerifiedAction.handler({
+        input: z.object({
+            message_id: z.string(),
+            emoji_id: z.string(),
+        }),
+        resolve: async ({ database, input, user }) => {
+            const reaction = await database.transaction(async (tx) => {
+                const isAllowed = await tx.isAllowedToReact({
+                    message_id: input.message_id,
+                });
+
+                if (!isAllowed) {
+                    throw new ApiError(403, "You must be a member of the community to react to this message.");
+                }
+
+                return await tx.reactToMessage({
+                    message_id: input.message_id,
+                    emoji_id: input.emoji_id,
+                });
+            });
+
+            return reaction;
+        },
+    }),
+    deleteReaction: userVerifiedAction.handler({
+        input: z.object({
+            message_id: z.string(),
+            emoji_id: z.string(),
+        }),
+        resolve: async ({ database, input, user }) => {
+            await database.deleteReaction({
+                message_id: input.message_id,
+                emoji_id: input.emoji_id,
+            });
         },
     }),
 };

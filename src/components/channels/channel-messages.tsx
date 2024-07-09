@@ -34,7 +34,22 @@ export const ChannelMessages = () => {
         },
         onMessage: (message) => {
             queryClient.setQueryData(messages.queryKey, (data: typeof messages.data) => {
-                data.pages[0].messages.push(message);
+                const { temp_id, ...rest } = message;
+
+                const existingIndex = data.pages[0].messages.findIndex((m) => m.id === temp_id);
+
+                if (existingIndex !== -1) {
+                    data.pages[0].messages[existingIndex] = {
+                        ...rest,
+                        reply_to: rest.reply_to ?? null,
+                    };
+                    return data;
+                }
+
+                data.pages[0].messages.push({
+                    ...rest,
+                    reply_to: rest.reply_to ?? null,
+                });
                 return data;
             });
         },

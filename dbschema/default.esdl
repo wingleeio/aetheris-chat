@@ -125,6 +125,7 @@ module default {
         community: Community;
         channel: Channel;
         multi reactions := .<message[is MessageReact];
+        reply_to: Message;
     }
 
     type MessageReact extending Base {
