@@ -1,12 +1,14 @@
 "use client";
-import { Message } from "@/components/shared/message";
-import { DEFAULT_ID } from "@/constants";
+
 import { api, helpers } from "@/lib/api";
 import { client, useAetherisContext } from "@/lib/client";
-import { cn } from "@/lib/utils";
-import { useParams } from "next/navigation";
-import { useEffect } from "react";
+
+import { DEFAULT_ID } from "@/constants";
 import { InView } from "react-intersection-observer";
+import { Message } from "@/components/shared/message";
+import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import { useParams } from "next/navigation";
 
 export const ChannelMessages = () => {
     const { queryClient } = useAetherisContext();
@@ -24,10 +26,6 @@ export const ChannelMessages = () => {
         initialPageParam: DEFAULT_ID,
     });
 
-    if (!messages.data || !channel.data) {
-        return null;
-    }
-
     client.channels.listenToChannelMessages.useSubscription({
         input: {
             channel_id: params.channel,
@@ -36,17 +34,17 @@ export const ChannelMessages = () => {
             queryClient.setQueryData(messages.queryKey, (data: typeof messages.data) => {
                 const { temp_id, ...rest } = message;
 
-                const existingIndex = data.pages[0].messages.findIndex((m) => m.id === temp_id);
+                const existingIndex = data!.pages[0].messages.findIndex((m) => m.id === temp_id);
 
                 if (existingIndex !== -1) {
-                    data.pages[0].messages[existingIndex] = {
+                    data!.pages[0].messages[existingIndex] = {
                         ...rest,
                         reply_to: rest.reply_to ?? null,
                     };
                     return data;
                 }
 
-                data.pages[0].messages.push({
+                data!.pages[0].messages.push({
                     ...rest,
                     reply_to: rest.reply_to ?? null,
                 });
@@ -97,6 +95,9 @@ export const ChannelMessages = () => {
         }
     }, []);
 
+    if (!messages.data || !channel.data) {
+        return null;
+    }
     return (
         <div className="flex-grow relative">
             <div className="absolute inset-0 overflow-auto flex flex-col-reverse">
